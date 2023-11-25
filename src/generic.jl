@@ -1,5 +1,4 @@
 ## Methods for handling tabular MDPs with a specific integer implementation
-
 import Base
 using DataFrames: DataFrame
 using DataFramesMeta
@@ -94,9 +93,6 @@ end
 # Loads CSV files
 # ----------------------------------------------------------------
 
-load_generic_mdp(input; idoutcome = nothing, docompress = false) =
-    load_mdp(input; idoutcome = nothing, docompress = false) 
-    
 """
     load_mdp(input, idoutcome)
 
@@ -169,7 +165,11 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
         action_init = BitVector(false for a in 1:length(actions))
         for ad ∈ groupby(sd, :idaction)
             idaction = first(ad.idaction)
+            try 
             actions[idaction] = GenericAction(ad.idstateto, ad.probability, ad.reward)
+            catch e
+                error("Error in state $(idstate-1), action $(idaction-1): $e")
+            end
             action_init[idaction] = true
         end
         # report an error when there are missing indices

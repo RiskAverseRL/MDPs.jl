@@ -2,12 +2,11 @@ using CSV: File
 #using Arrow
 
 @testset "Generic MDP" begin
-    
     filepath = joinpath(dirname(pathof(MDPs)), "..",
-                        "data", "riverswim.arrow")
+                        "data", "riverswim.csv")
     
-    model = load_generic_mdp(File(filepath); idoutcome = 1)
-    #model = load_generic_mdp(Arrow.Table(filepath); idoutcome = 1)
+    model = load_mdp(File(filepath); idoutcome = 1)
+    #model = load_mdp(Arrow.Table(filepath); idoutcome = 1)
 
     sol_t = value_iteration(model, 0.9, 30)
     sol_vi = value_iteration(model, 0.9; iterations = 30)
