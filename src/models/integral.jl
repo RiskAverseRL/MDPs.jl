@@ -26,13 +26,13 @@ associated with the transition. The transitions are not aggregated to allow for
 comuting the risk of a transition. Aggregating the values by state would change
 the risk value of the transition. 
 """
-struct GenericAction
+struct IntAction
     """ 1-based state index of the next state """
     nextstate :: Vector{Int}
     probability :: Vector{Float64}
     reward :: Vector{Float64}
 
-    function GenericAction(nextstate, probability, reward) 
+    function IntAction(nextstate, probability, reward) 
         # check that the provided values make sense
         (_same_lengths(nextstate, probability, reward)) ||
             error("Argument lengths must match.")
@@ -48,7 +48,7 @@ struct GenericAction
 end
 
 # Prints the action
-function Base.show(io::IO, t::MIME"text/plain", a::GenericAction)
+function Base.show(io::IO, t::MIME"text/plain", a::IntAction)
     show(io, t, collect(zip(a.nextstate, a.probability, a.reward)))
 end
 
@@ -57,9 +57,9 @@ end
 # ----------------------------------------------------------------
     
 """ Represents a discrete state """
-struct GenericState
-    actions :: Vector{GenericAction}
-    function GenericState(actions :: Vector{GenericAction})
+struct IntState
+    actions :: Vector{IntAction}
+    function IntState(actions :: Vector{IntAction})
         isempty(actions) && throw(ArgumentError("Empty states not allowed"))
         new(actions)
     end
@@ -69,23 +69,22 @@ end
 MDP with integral states and stationary transitions 
 State and action indexes are all 1-based integers
 """
-struct GenericMDP <: TabMDP
+struct IntMDP <: TabMDP
     """ States, actions, transitions """
-    states :: Vector{GenericState}
+    states :: Vector{IntState}
 end
 
 # ----------------------------------------------------------------
 # TabMDP Interface functions
 # ----------------------------------------------------------------
 
-state_count(model::GenericMDP) = length(model.states)
-states(model::GenericMDP) = 1:state_count(model)
-action_count(model::GenericMDP, s::Int) = length(model.states[s].actions)
-actions(model::GenericMDP, s::Int) = 1:length(model.states[s].actions)
-reward_T(::GenericMDP, t::Int, s::Int) = 0                   # there is no terminal reward
-transition(model::GenericMDP, s::Int, a::Int) =
+state_count(model::IntMDP) = length(model.states)
+states(model::IntMDP) = 1:state_count(model)
+action_count(model::IntMDP, s::Int) = length(model.states[s].actions)
+actions(model::IntMDP, s::Int) = 1:length(model.states[s].actions)
+transition(model::IntMDP, s::Int, a::Int) =
     (x = model.states[s].actions[a]; zip(x.nextstate, x.probability, x.reward))
-function getnext(model::GenericMDP, s::Int, a::Int) 
+function getnext(model::IntMDP, s::Int, a::Int) 
     x = model.states[s].actions[a]
     (states = x.nextstate, probabilities = x.probability, rewards = x.reward)
 end
@@ -155,18 +154,18 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
     mdp = @orderby(mdp, :idstatefrom, :idaction, :idstateto)
     
     statecount = max(maximum(mdp.idstatefrom), maximum(mdp.idstateto))
-    states = Vector{GenericState}(undef, statecount)
+    states = Vector{IntState}(undef, statecount)
     state_init = BitVector(false for s in 1:statecount)
 
     for sd ∈ groupby(mdp, :idstatefrom)
         idstate = first(sd.idstatefrom)
-        actions = Vector{GenericAction}(undef, maximum(sd.idaction))
+        actions = Vector{IntAction}(undef, maximum(sd.idaction))
        
         action_init = BitVector(false for a in 1:length(actions))
         for ad ∈ groupby(sd, :idaction)
             idaction = first(ad.idaction)
             try 
-            actions[idaction] = GenericAction(ad.idstateto, ad.probability, ad.reward)
+            actions[idaction] = IntAction(ad.idstateto, ad.probability, ad.reward)
             catch e
                 error("Error in state $(idstate-1), action $(idaction-1): $e")
             end
@@ -177,26 +176,26 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
             throw(FormatError("Actions in state " * string(idstate - 1) *
                 " that were uninitialized " * string(findall(.!action_init) .- 1 ) ))
 
-        states[idstate] = GenericState(actions)
+        states[idstate] = IntState(actions)
         state_init[idstate] = true
     end
 
     # create transitions to itself for each uninitialized state
     # to simulate a terminal state
     for s ∈ findall(.!state_init)
-        states[s] = GenericState([GenericAction([s], [1.], [0.])])
+        states[s] = IntState([IntAction([s], [1.], [0.])])
     end
-    GenericMDP(states)
+    IntMDP(states)
 end
 
 """
-    make_generic_mdp(Ps, rs)
+    make_int_mdp(Ps, rs)
 
-Build GenericMDP from a list of transition probabilities `Ps` and reward vectors
+Build IntMDP from a list of transition probabilities `Ps` and reward vectors
 `rs` for each action in the MDP. Each row of the transition matrix represents
 the probabilities of transitioning to next states.
 """
-function make_generic_mdp(Ps::AbstractVector{Matrix{X}},
+function make_int_mdp(Ps::AbstractVector{Matrix{X}},
                           rs::AbstractVector{Vector{Y}}) where {X <: Number, Y <: Number}
     
     isempty(Ps) && error("Must have at least one action.")
@@ -205,23 +204,23 @@ function make_generic_mdp(Ps::AbstractVector{Matrix{X}},
     statecount = size(Ps[1])[1]
     actioncount = length(Ps)
 
-    states = Vector{GenericState}(undef, statecount)
+    states = Vector{IntState}(undef, statecount)
     for s ∈ 1:statecount
-        actions = Vector{GenericAction}(undef, actioncount)
+        actions = Vector{IntAction}(undef, actioncount)
         for a ∈ 1:actioncount
-            actions[a] = GenericAction(1:statecount, Ps[a][s,:],
+            actions[a] = IntAction(1:statecount, Ps[a][s,:],
                                        repeat([rs[a][s]], statecount) )
         end
-        states[s] = GenericState(actions)
+        states[s] = IntState(actions)
     end
-    GenericMDP(states)
+    IntMDP(states)
 end
 
 
 """
-    make_generic_mdp(mdp::TabMDP, docompress = false)
+    make_int_mdp(mdp::TabMDP, docompress = false)
 
-Transform any tabular MDP `mdp` to a generic one. This helps to accelerate
+Transform any tabular MDP `mdp` to a numeric one. This helps to accelerate
 operations and value function computation. The actions are also turned into 1-based integer
 values.
 
@@ -231,21 +230,21 @@ in risk-averse settings.
 
 The function adds one more state at the end which represents a catch-all terminal state
 """
-function make_generic_mdp(mdp::TabMDP; docompress = false)
+function make_int_mdp(mdp::TabMDP; docompress = false)
     statecount = state_count(mdp)
-    states = Vector{GenericState}(undef, statecount + 1) # + terminal
+    states = Vector{IntState}(undef, statecount + 1) # + terminal
    
     # add a self-looping state to model a terminal state
-    # needed to handle reward_T (termanl)
-    states[statecount+1] = GenericState([GenericAction([statecount+1],[1.0],[0.0])])
+    # needed to handle terminal state
+    states[statecount+1] = IntState([IntAction([statecount+1],[1.0],[0.0])])
                           
     Threads.@threads for s ∈ 1:statecount
         action_vals = 1:action_count(mdp, s)
         if isterminal(mdp, s)
-            states[s]  = GenericState([GenericAction(
-                [statecount+1], [1.0], [reward_T(mdp, s)])])
+            states[s]  = IntState([IntAction(
+                [statecount+1], [1.0], [0.])])
         else
-            acts = Vector{GenericAction}(undef, length(action_vals))
+            acts = Vector{IntAction}(undef, length(action_vals))
             for (ia,a) ∈ enumerate(action_vals)
                 ns = Array{Int}(undef, 0)     # next state
                 np = Array{Float64}(undef, 0) # next probalbility
@@ -258,23 +257,22 @@ function make_generic_mdp(mdp::TabMDP; docompress = false)
                     insert!(np, i, nextp)
                     insert!(nr, i, nextr)
                 end
-                a = GenericAction(ns, np, nr)
+                a = IntAction(ns, np, nr)
                 acts[ia] = docompress ? compress(a) : a
             end
-            states[s] = GenericState(acts)
+            states[s] = IntState(acts)
         end
     end
-    GenericMDP(states)
+    IntMDP(states)
 end
 
 """
     compress(nextstate, probability, reward) 
 
-An generic action can represent the transitions to the same state with multiple entries.
-The command will combine transitions to the same state into a single transition. Reward
+The command will combine mulitple transitions to the same state into a single transition. Reward
 is computed as a weigted average of the individual rewards, assuming expected reward objective.
 """
-function compress(a::GenericAction) 
+function compress(a::IntAction) 
     nextstate = a.nextstate
     probability = a.probability
     reward = a.reward
@@ -302,7 +300,7 @@ function compress(a::GenericAction)
             @inbounds nr[i] /= np[i]
         end
     end
-    GenericAction(ns, np, nr):: GenericAction
+    IntAction(ns, np, nr):: IntAction
 end
 
 
@@ -312,16 +310,16 @@ end
 Compute the state-action-values for state `s`, action `a`, and
 value function `v` for a discount factor `γ`.
 
-This function overrides the standard definition in the hope of
-speeding up the computation.
+This function is just a more efficient version of the standard definition.
 """
-@inline function qvalue(model::GenericMDP, γ::Real,
+@inline function qvalue(model::IntMDP, objective::Objective,
                         s::Int, a::Int, v::AbstractVector{<:Real}) 
     x = model.states[s].actions[a]
     val = 0.0
     # much much faster than sum( ... for)
     for i ∈ eachindex(x.nextstate, x.probability, x.reward)
-        @inbounds val += x.probability[i] * (x.reward[i] + γ * v[x.nextstate[i]])
+        @inbounds val += x.probability[i] *
+            (x.reward[i] + discount(objective) * v[x.nextstate[i]])
     end
     val :: Float64
 end

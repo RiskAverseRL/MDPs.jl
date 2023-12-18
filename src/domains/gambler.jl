@@ -43,7 +43,6 @@ function transition(model::Ruin, state::Int, action::Int)
     end
 end
 
-
 state_count(model::Ruin) = model.max_capital + 1
 action_count(model::Ruin, state::Int) = state
 
