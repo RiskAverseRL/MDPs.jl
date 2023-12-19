@@ -1,9 +1,10 @@
-using Documenter, RiskMeasures
+using Documenter, MDPs
 
-makedocs(sitename="RiskMeasures.jl",
-         modules = [RiskMeasures],
+makedocs(sitename="MDPs.jl",
+         modules = [MDPs],
          format = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true"),
-         pages = ["index.md"]
+         pages = ["index.md",
+                  "simulation.md"]
          )
 
 deploydocs(;

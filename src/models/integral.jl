@@ -119,17 +119,26 @@ The method can also process CSV files for MDPO/MMDP, in which case
 
 Load the model from a CSV
 ```jldoctest
-    using CSV: File
-    filepath = joinpath(dirname(pathof(MDPs)), "..",
-                        "data", "riverswim.csv")
-    model = load_mdp(File(filepath); idoutcome = 1)
+using CSV: File
+using MDPs
+filepath = joinpath(dirname(pathof(MDPs)), "..",
+                    "data", "riverswim.csv")
+model = load_mdp(File(filepath); idoutcome = 1)
+state_count(model)
+
+# output
+20
 ```
 Load the model from an Arrow file (a binary tabular file format)
 ```jldoctest
-    using Arrow
-    filepath = joinpath(dirname(pathof(MDPs)), "..",
-                        "data", "riverswim.arrow")
-    model = load_mdp(Arrow.Table(filepath); idoutcome = 1)
+using MDPs, Arrow
+filepath = joinpath(dirname(pathof(MDPs)), "..",
+                    "data", "riverswim.arrow")
+model = load_mdp(Arrow.Table(filepath); idoutcome = 1)
+state_count(model)
+
+# output
+20
 ```
 """
 function load_mdp(input; idoutcome = nothing, docompress = false)
