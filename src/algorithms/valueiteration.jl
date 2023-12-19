@@ -17,7 +17,7 @@ happens at time T. Returns a vector of value functions for each time step.
 
 The argument `v_terminal` represents the terminal value function. It should be provided as
 a function that maps the state id to its terminal value (at time T+1). If this value is provided,
-then it is used in place of reward_T.
+then it is used in place of 0.
 
 Infinite Horizon
 ----------------
@@ -56,14 +56,12 @@ function value_iteration!(v::Vector{Vector{Float64}}, π::Vector{Vector{Int}},
     n = state_count(model)
 
     # final value function
-    v[horizon(objective)+1] .= isnothing(v_terminal) ?
-        reward_T.((model,), horizon(objective)+1, 1:n) :
-        map(v_terminal, 1:n)
+    v[horizon(objective)+1] .= isnothing(v_terminal) ? 0 : map(v_terminal, 1:n)
 
     for t ∈ horizon(objective):-1:1
         # initialize vectors
         Threads.@threads for s ∈ 1:n           
-            bg = bellmangreedy(model, t, objective, s, v[t+1])
+            bg = bellmangreedy(model, objective, s, v[t+1])
             v[t][s] = bg.qvalue
             π[t][s] = bg.action
         end
@@ -73,14 +71,14 @@ end
 
 function value_iteration(model::TabMDP, objective::Stationary;
                          iterations::Integer = 10000, ϵ::Number = 1e-3)
-    states = state_count(model)
-    vold = zeros(states)  # prior iteration
-    vnew = zeros(states)  # current iteration
+    nstates = state_count(model)
+    vold = zeros(nstates)  # prior iteration
+    vnew = zeros(nstates)  # current iteration
     residual = 0.         # the bellman residual
     itercount = iterations
 
     for it ∈ 1:iterations
-        Threads.@threads for s ∈ 1:states
+        Threads.@threads for s ∈ 1:nstates
             @inbounds vnew[s] = bellman(model, objective, s, vold)
         end
         # compute the bellman residual

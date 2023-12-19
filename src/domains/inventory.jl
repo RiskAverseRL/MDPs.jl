@@ -1,6 +1,7 @@
 module Inventory
 
 import ...TabMDP, ...transition, ...state_count, ...action_count
+import ...actions, ...states
 
 """
 Models values of demand in `values` and probabilities in `probabilities`.
@@ -103,6 +104,8 @@ action_count(params::Parameters, state::Int) =
 
 """
 An inventory MDP problem simulator
+
+The states and actions are 1-based integers.
 """
 struct Model <: TabMDP
     params :: Parameters
@@ -123,5 +126,8 @@ end
 
 state_count(model::Model) = state_count(model.params)
 action_count(model::Model, state::Int) = action_count(model.params, state)
+
+states(model::Model) = 1:state_count(model.params)
+actions(model::Model, state::Int) = 1:action_count(model.params, state)
 
 end # Module: Inventory

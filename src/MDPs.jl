@@ -18,7 +18,6 @@ include("models/integral.jl")
 export IntMDP, IntState, IntAction
 export load_mdp, load_int_mdp, make_int_mdp, compress
 
-
 include("valuefunction/valuefunction.jl")
 export make_value
 
@@ -26,13 +25,13 @@ include("valuefunction/bellman.jl")
 export qvalue, qvalues, qvalues!
 export greedy, greedy!, bellman, bellmangreedy
 
-include("algorithms/value_iteration.jl")
+include("algorithms/valueiteration.jl")
 export value_iteration, value_iteration!
 
 include("algorithms/mrp.jl")
 export mrp!, mrp, mrp_sparse
 
-include("algorithms/policy_iteration.jl")
+include("algorithms/policyiteration.jl")
 export policy_iteration, policy_iteration_sparse
 
 include("simulation.jl")

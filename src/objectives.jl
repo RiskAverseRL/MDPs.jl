@@ -10,20 +10,20 @@ In other words, the solution is time-dependent.
 abstract type Markov <: Objective end
 
 """
-Objective solved by a deterministic Markov non-stationary policy.
-In other words, the solution is time-dependent.
-"""
-abstract type MarkovDet <: Objective end
-
-"""
 Objective that is solved by a randomized stationary policy
 """
 abstract type Stationary <: Markov end
 
 """
+Objective solved by a deterministic Markov non-stationary policy.
+In other words, the solution is time-dependent.
+"""
+abstract type MarkovDet <: Markov end
+
+"""
 Objective that is solved by a randomized stationary policy
 """
-abstract type StationaryDet <: Objective end
+abstract type StationaryDet <: Stationary end
 
 """
 Inifinite-horizon discounted objective. The discount factor `γ` can

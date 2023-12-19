@@ -304,22 +304,3 @@ function compress(a::IntAction)
 end
 
 
-"""
-    qvalue(model, γ, s, a, v)
-
-Compute the state-action-values for state `s`, action `a`, and
-value function `v` for a discount factor `γ`.
-
-This function is just a more efficient version of the standard definition.
-"""
-@inline function qvalue(model::IntMDP, objective::Objective,
-                        s::Int, a::Int, v::AbstractVector{<:Real}) 
-    x = model.states[s].actions[a]
-    val = 0.0
-    # much much faster than sum( ... for)
-    for i ∈ eachindex(x.nextstate, x.probability, x.reward)
-        @inbounds val += x.probability[i] *
-            (x.reward[i] + discount(objective) * v[x.nextstate[i]])
-    end
-    val :: Float64
-end

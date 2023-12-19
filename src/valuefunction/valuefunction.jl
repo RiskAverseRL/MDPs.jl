@@ -1,4 +1,3 @@
-
 """
     make_value(model, objective)
 

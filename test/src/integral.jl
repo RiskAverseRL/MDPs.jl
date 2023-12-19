@@ -14,7 +14,7 @@ using CSV: File
     @test all(sol_t.value[1] .≈ sol_vi.value)
 
     sol_vi_close = value_iteration(model, InfiniteH(0.9); ϵ = 0.01)
-    greedy_pol = greedy(model, 0.9, sol_vi_close.value)
+    greedy_pol = greedy(model, InfiniteH(0.9), sol_vi_close.value)
     sol_pi = policy_iteration(model, 0.9)
 
     @test all(abs.(sol_pi.value .- sol_vi_close.value) .≤ 0.1)

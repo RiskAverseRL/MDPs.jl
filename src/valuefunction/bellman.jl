@@ -64,6 +64,27 @@ There is no set representation for the value function.
     val 
 end
 
+
+"""
+    qvalue(model, γ, s, a, v)
+
+Compute the state-action-values for state `s`, action `a`, and
+value function `v` for a discount factor `γ`.
+
+This function is just a more efficient version of the standard definition.
+"""
+@inline function qvalue(model::IntMDP, objective::Objective,
+                        s::Int, a::Int, v::AbstractVector{<:Real}) 
+    x = model.states[s].actions[a]
+    val = 0.0
+    # much much faster than sum( ... for)
+    for i ∈ eachindex(x.nextstate, x.probability, x.reward)
+        @inbounds val += x.probability[i] *
+            (x.reward[i] + discount(objective) * v[x.nextstate[i]])
+    end
+    val :: Float64
+end
+
 # ----------------------------------------------------------------
 # Generalized Bellman operators
 # ----------------------------------------------------------------
@@ -94,23 +115,60 @@ end
 # ----------------------------------------------------------------
 
 """ 
-    greedy(model, obj, s, v)
+    greedy(model, obj, [s,] v)
 
 Compute the greedy action for state `s` and value 
 function `v` assuming an objective `obj`.
 
-A real-valued objective `obj` is interpreted as a discount factor. 
+If `s` is not provided, then computes a value function for all states.
+The model must support `states` function.
 """
-greedy(model::MDP{S,A}, obj, s::S, v) :: A where {S,A} =
-    bellmangreedy(model, obj, s, v).action 
+greedy(model::MDP{S,A}, obj::Objective, s::S, v)  where {S,A}  =
+    bellmangreedy(model, obj, s, v).action :: A
+
+#greedy(model::TabMDP{S,A}, obj::Objective, v) where {S,A} =
+#    greedy.((model,), (obj,), states(model), (v,))
+
+"""
+    greedy!(π, model, obj, v)
+
+Update policy `π` with the greedy policy for value function `v` and MDP `model`
+and an objective `obj`.
+"""
+function greedy!(π::Vector{Int}, model::TabMDP, obj::Objective,
+        v::AbstractVector{<:Real})  
+
+    length(π) == state_count(model) ||
+        error("Policy π length must be the same as the state count")
+    length(v) == state_count(model) ||
+        error("Value function length must be the same as the state count")
+            
+    π .= greedy.((model,), (obj,), states(model), (v,))
+end
+
+
+""" 
+    greedy(model, obj, v)
+
+Compute the greedy action for all states and value function `v` assuming
+an objective `obj`.
+"""
+function greedy(model::TabMDP, obj::Stationary, v::AbstractVector{<:Real}) 
+    π = Vector{Int}(undef, state_count(model))
+    greedy!(π,model,obj,v)
+    π
+end
+
+greedy(model, γ::Real, v::AbstractVector{<:Real}) = greedy(model, InfiniteH(γ), v)
+
 
 """ 
     bellman(model, γ, s, v)
 
-Compute the Bellman operator for state `s`, and value 
-function `v` assuming an objective `obj`.
+Compute the Bellman operator for state `s`, and value function `v` assuming
+an objective `obj`.
 
 A real-valued objective `obj` is interpreted as a discount factor. 
 """
-bellman(model::MDP{S,A}, obj, s::S, v) :: Float64 where {S,A} =
-    bellmangreedy(model, obj, s, v).qvalue 
+bellman(model::MDP{S,A}, obj::Objective, s::S, v) where {S,A} =
+    bellmangreedy(model, obj, s, v).qvalue :: Float64

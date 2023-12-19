@@ -29,16 +29,16 @@ using MDPs.Domains
 
     model = Inventory.Model(params)
     simulate(model, random_π(model), 1, 10000, 500)
-    model_g = make_generic_mdp(model; docompress = false);
-    model_gc = make_generic_mdp(model; docompress = true);
+    model_g = make_int_mdp(model; docompress = false);
+    model_gc = make_int_mdp(model; docompress = true);
 
-    v1 = value_iteration(model, 0.95; ϵ = 1e-10)
-    v2 = value_iteration(model_g, 0.95; ϵ = 1e-10)
-    v3 = value_iteration(model_gc, 0.95; ϵ = 1e-10)
+    v1 = value_iteration(model, InfiniteH(0.95); ϵ = 1e-10)
+    v2 = value_iteration(model_g, InfiniteH(0.95); ϵ = 1e-10)
+    v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ = 1e-10)
     v4 = policy_iteration(model_gc, 0.95)
 
 
-    # note that the generic MDP does not have terminal states,
+    # note that the IntMDP does not have terminal states,
     # so the last action will not be -1
 
     #make sure value functions are close
@@ -46,9 +46,9 @@ using MDPs.Domains
     @test map(x->x[2] - x[1], mapslices(extrema, V; dims = 2)) |> maximum ≤ 1e-6
 
     # make sure policies are identical
-    p1 = greedy(model, 0.95,    v1.value)
-    p2 = greedy(model_g, 0.95,  v2.value)
-    p3 = greedy(model_gc, 0.95, v3.value)
+    p1 = greedy(model, InfiniteH(0.95),  v1.value)
+    p2 = greedy(model_g, InfiniteH(0.95),  v2.value)
+    p3 = greedy(model_gc, InfiniteH(0.95), v3.value)
     p4 = v4.policy
 
     P = hcat(p1, p2[1:(end-1)], p3[1:(end-1)], p4[1:(end-1)])
