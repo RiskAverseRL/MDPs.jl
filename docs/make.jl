@@ -8,7 +8,7 @@ makedocs(sitename="MDPs.jl",
          )
 
 deploydocs(;
-    repo = "github.com/RiskAverseRL/RiskMeasures.jl.git",
+    repo = "github.com/RiskAverseRL/MDPs.jl.git",
     versions = ["stable" => "v^", "v#.#", "dev" => "master"],
     push_preview=true,
 )
