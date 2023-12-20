@@ -3,7 +3,7 @@ MDPs: Markov Decision Processes
 
 [![Build Status](https://github.com/RiskAverseRL/MDPs/workflows/CI/badge.svg)](https://github.com/RiskAverseRL/MDPs/actions)
 
-[!(https://img.shields.io/badge/docs-latest-blue.svg)](https://riskaverserl.github.io/MDPs.jl/dev/)
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://riskaverserl.github.io/MDPs.jl/dev/)
 
 
 **This is experimental software which can fail or change in unpredictable ways.**
