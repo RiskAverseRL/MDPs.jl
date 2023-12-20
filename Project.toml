@@ -9,6 +9,11 @@ DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
+[compat]
+julia = "1.9"
+DataFrames = "1.6.1"
+DataFramesMeta = "0.14.1"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
