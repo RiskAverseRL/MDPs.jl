@@ -8,6 +8,8 @@ MDPs: Markov Decision Processes
 
 **This is experimental software which can fail or change in unpredictable ways.**
 
+## About
+
 A set of tools for solving primarily tabular Markov Decision Processes. The project aims to 
 
 1. Quickly and reliably solve small tabular MDPs with integral states and actions using standard algorithms. See `IntMDP`.
@@ -25,6 +27,14 @@ The project is build around the following main data structures:
 
 One of the main goals of the project is to support exploration of algorithms for solving various reinforcement learning objectives. To achieve this goal, the project involves a number of abstraction. The benefit of this approach is that one can implement new dynamic programming algorithm with a relatively high degree of code reuse.
 
+## Installation
+
+The package is not avaialble from the julia repository. You can install it directly from github:
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/RiskAverseRL/MDPs.jl")
+```
 
 ## Similar packages
 
