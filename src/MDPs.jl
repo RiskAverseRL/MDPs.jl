@@ -39,6 +39,7 @@ export simulate, random_π
 export Policy, PolicyStationary, PolicyMarkov
 export FPolicyS, FPolicyM, TabPolicySD, TabPolicyMD
 export cumulative
+export Transition
 
 # ----- Domains -------
 module Domains
