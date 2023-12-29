@@ -1,7 +1,7 @@
 module MDPs
 
 include("objectives.jl")
-export InfiniteH, FiniteH
+export InfiniteH, FiniteH, Markov, Stationary, MarkovDet, StationaryDet
 
 include("models/mdp.jl")
 export MDP
