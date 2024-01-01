@@ -52,5 +52,6 @@ export Machine
 include("domains/gambler.jl")
 export Gambler
 end
+export Domains
 # --------------------
 end # module MDPs
