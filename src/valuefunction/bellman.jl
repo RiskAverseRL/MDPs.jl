@@ -14,7 +14,8 @@ and transitions.
 
 The function is tractable only if there are a small number of actions and transitions.
 """
-function qvalues(model::MDP{S,A}, objective::Objective, s::S, v) where {S,A}
+function qvalues(model::MDP{S,A}, objective::Union{FiniteH, InfiniteH}, s::S, v) where
+    {S,A}
     acts = actions(model, s)
     qvalues = Vector{Float64}(undef, length(acts))
     qvalues!(qvalues, model, objective, s, v)
