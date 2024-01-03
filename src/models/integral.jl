@@ -133,12 +133,12 @@ Load the model from an Arrow file (a binary tabular file format)
 ```jldoctest
 using MDPs, Arrow
 filepath = joinpath(dirname(pathof(MDPs)), "..",
-                    "data", "riverswim.arrow")
-model = load_mdp(Arrow.Table(filepath); idoutcome = 1)
+                    "data", "inventory.arr")
+model = load_mdp(Arrow.Table(filepath))
 state_count(model)
 
 # output
-20
+21
 ```
 """
 function load_mdp(input; idoutcome = nothing, docompress = false)
