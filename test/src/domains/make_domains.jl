@@ -64,7 +64,7 @@ function make_domains()
     end
     # population
     begin
-        filein  = joinpath(dirname(pathof(MDPs)), "..", "data", "inventory.arr")
+        filein  = joinpath(dirname(pathof(MDPs)), "..", "data", "population.arr")
         model = load_mdp(Arrow.Table(filein))
         α = 0.9           # var, cvar, evar
         β = 0.5           # erm
