@@ -12,7 +12,7 @@ export valuefunction
 include("models/tabular.jl")
 export TabMDP
 export state_count, action_count, states, actions
-export transform
+export save_mdp
 
 include("models/integral.jl")
 export IntMDP, IntState, IntAction

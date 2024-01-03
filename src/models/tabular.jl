@@ -3,14 +3,12 @@ using LinearAlgebra
 using SparseArrays
 
 """ 
-An abstract tabular Markov Decision Process, time independent.
-
-Default interpretation
-- State: Positive integer (>0) is non-terminal, zero or negative integer is terminal
-- Action: Positive integer, anything else is invalid
+An abstract tabular Markov Decision Process which is specified by a transition function. 
 
 Functions that should be defined for any subtype for value and policy iterations
-to work are: `state_count`, `action_count`, `transition`
+to work are: `state_count`, `states`, `action_count`, `actions`, and `transition`.
+
+Generally, states should be 1-based.
 
 The methods `state_count` and `states` should only include non-terminal states
 """
@@ -27,9 +25,9 @@ function state_count end
 function action_count end
 
 # enumerates possible states
-function states end
+states(model::TabMDP) = 1:state_count(model)
 # enumerated possible actions
-function actions end
+actions(model::TabMDP, s::Int) = 1:action_count(model, s)
 
 
 # ----------------------------------------------------------------
@@ -37,23 +35,38 @@ function actions end
 # ----------------------------------------------------------------
 
 using DataFrames: DataFrame, append!
-#import Base: convert
+
 
 """
-    transform(T::DataFrame, model)
+    save_mdp(T::DataFrame, model::TabMDP)
 
-Convert a tabular MDP to a data frame representation
+Convert an MDP `model` to a `DataFrame` representation with 0-based indices.
+
+Important: The MDP representation uses 0-based indexes while the output
+DataFrame is 0-based for backwards compatibility.
+
+The columns are: `idstatefrom`, `idaction`, `idstateto`, `probability`,
+and `reward`.
 """
-function transform(::Type{DataFrame}, model::TabMDP)
-    result = DataFrame()
+function save_mdp(::Type{DataFrame}, model::TabMDP)
+    arr_idstatefrom = Vector{Int}()
+    arr_idstateto = Vector{Int}()
+    arr_idaction = Vector{Int}()
+    arr_prob = Vector{Float64}()
+    arr_reward = Vector{Float64}()
+
     for s ∈ states(model)
         for a ∈ actions(model, s)
             for (sn,p,r) ∈ transition(model, s, a)
-                newrow = (idstatefrom = s, idaction = a, idstateto = sn,
-                          probability = p, reward = r)
-                push!(result, newrow)
+                push!(arr_idstatefrom, s - 1)
+                push!(arr_idaction, a - 1)
+                push!(arr_idstateto, sn - 1)
+                push!(arr_prob, p)
+                push!(arr_reward, r)
             end
         end
     end
-    result
+    DataFrame(idstatefrom = arr_idstatefrom, idaction = arr_idaction,
+              idstateto = arr_idstateto, probability = arr_prob,
+              reward = arr_reward)
 end
