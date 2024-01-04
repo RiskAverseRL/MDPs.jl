@@ -61,7 +61,7 @@ function value_iteration!(v::Vector{Vector{Float64}}, π::Vector{Vector{Int}},
     for t ∈ horizon(objective):-1:1
         # initialize vectors
         Threads.@threads for s ∈ 1:n           
-            bg = bellmangreedy(model, objective, s, v[t+1])
+            bg = bellmangreedy(model, objective, t, s, v[t+1])
             v[t][s] = bg.qvalue
             π[t][s] = bg.action
         end
