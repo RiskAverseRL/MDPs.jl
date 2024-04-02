@@ -197,29 +197,32 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
     IntMDP(states)
 end
 
+
+_make_reward(r::Vector{<:Number}, s, n) = repeat([r[s]], n) 
+_make_reward(R::Matrix{<:Number}, s, n) = R[s,:]
+    
+
 """
     make_int_mdp(Ps, rs)
 
 Build IntMDP from a list of transition probabilities `Ps` and reward vectors
-`rs` for each action in the MDP. Each row of the transition matrix represents
-the probabilities of transitioning to next states.
+`rs` for each action in the MDP. If `rs` are vectors, then they are assumed
+to be state action rewards. If `rs` are matrixes then they are assumed to be
+state-action-state rewwards. Each row of the transition matrix (and the reward
+matrix) represents the probabilities of transitioning to next states.
 """
-function make_int_mdp(Ps::AbstractVector{Matrix{X}},
-                          rs::AbstractVector{Vector{Y}}) where {X <: Number, Y <: Number}
+function make_int_mdp(Ps::AbstractVector{<:Matrix}, rs::AbstractVector{<:Array})
     
     isempty(Ps) && error("Must have at least one action.")
-    length(Ps) == length(rs) || error("Dimensions must match.")
+    length(Ps) == length(rs) || error("Ps and rs lengths must match.")
 
     statecount = size(Ps[1])[1]
-    actioncount = length(Ps)
 
     states = Vector{IntState}(undef, statecount)
     for s ∈ 1:statecount
-        actions = Vector{IntAction}(undef, actioncount)
-        for a ∈ 1:actioncount
-            actions[a] = IntAction(1:statecount, Ps[a][s,:],
-                                       repeat([rs[a][s]], statecount) )
-        end
+        actions = [
+            IntAction(1:statecount, Ps[a][s,:], _make_reward(rs[a], s, statecount))
+            for a ∈ eachindex(Ps,rs)]
         states[s] = IntState(actions)
     end
     IntMDP(states)

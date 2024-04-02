@@ -6,12 +6,14 @@ mt(st, prob,rew) =
     (Int(st), Float64(prob), Float64(rew))::Tuple{Int, Float64, Float64}
 
 """
+    Ruin(win, max_capital)
+
 Gambler's ruin. Can decide how much to bet at any point in time. With some
-probability `p`, the bet is doubled, and with `1-p` it is lost. The
+probability `win`, the bet is doubled, and with `1-win` it is lost. The
 reward is 1 if it achieves some terminal capital and 0 otherwise.
 
-Capital = state - 1
-Bet = action - 1 
+- Capital = state - 1
+- Bet = action - 1 
 
 Available actions are 1, ..., state - 1.
 

@@ -37,4 +37,28 @@ CSV.write(fileout, output)
 # output
 
 1
-```	   
+```
+
+## Making a small MDP
+
+```jldoctest
+using MDPs
+
+ε = 0.01
+# transition probabilities
+P1 = [1 0 0; 0   1 0; 0 0 1]
+P2 = [0 1 0; 1-ε 0 ε; 0 0 1]
+Ps = [P1, P2]
+
+# rewards
+R = [10 -4 0; -1 -3 0; 0 0 0] # use the same reward for both actions
+Rs = [R, R]
+
+M = make_int_mdp(Ps, Rs)
+
+state_count(M)
+
+# output 
+
+3
+```

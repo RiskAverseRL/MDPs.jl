@@ -12,10 +12,11 @@ MDP `model` and policy `π`. Also supports terminal states.
 Does not support duplicate entries in transition probabilities.
 """
 function mrp!(P_π::AbstractMatrix{<:Real}, r_π::AbstractVector{<:Real},
-              model::TabMDP, π::AbstractVector{Int})
+              model::TabMDP, π::AbstractVector{<:Integer})
     S = state_count(model)
     fill!(P_π, 0.); fill!(r_π, 0.)
     for s ∈ 1:S
+        #TODO: remove the definition of terminal states
         if !isterminal(model, s)
             for (sn, p, r) ∈ transition(model, s, π[s])
                 P_π[s,sn] ≈ 0. ||
@@ -35,10 +36,10 @@ end
 Compute the transition matrix `P_π` and reward vector `r_π` for the 
 MDP `model` and policy `π`. See mrp! for more details. 
 """
-function mrp(model::TabMDP, π::AbstractVector{Int})
+function mrp(model::TabMDP, π::AbstractVector{<:Integer})
     S = state_count(model)
     P_π = Matrix{Float64}(undef,S,S)
-    r_π = Vector(undef, S)
+    r_π = Vector{Float64}(undef, S)
     mrp!(P_π, r_π, model, π)
     (P_π, r_π)    
 end
