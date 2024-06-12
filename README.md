@@ -1,4 +1,4 @@
-MDPs: Markov Decision Processes (Dumb change)
+MDPs: Markov Decision Processes
 ===============================
 
 [![Build Status](https://github.com/RiskAverseRL/MDPs/workflows/CI/badge.svg)](https://github.com/RiskAverseRL/MDPs/actions)
