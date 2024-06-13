@@ -16,21 +16,17 @@ Models values of demand in `values` and probabilities in `probabilities`.
     RIGHT
 end
 
-struct Rewards
-    rewards_s::Vector{Float64}
-end
-
-struct Limits
-    max_side_length::Int
-end
-
 """
 Parameters that define a GridWorld problem
+
+- `rewards_s`: A vector of rewards for each state
+- `max_side_length`: An integer that represents the maximum side length of the grid
+- `wind`: A float that represents the wind
 """
 struct Parameters
-    costs::Rewards
-    limits::Limits
-    actions::Action
+    rewards_s::Vector{Float64}
+    max_side_length::Int
+    wind::Float64
 end
 
 
@@ -48,22 +44,42 @@ struct Model <: TabMDP
 end
 
 function transition(model::Model, state::Int, action::Int)
-    stock = state2stock(model.params, state)
-    order = action2order(model.params, action)
-
-    function make_transition(v, p)
-        t = transition(model.params, stock, order, v)
-        (stock2state(model.params, t.stock), p, t.reward)
+    n = model.params.max_side_length
+    n_states = state_count(model.params)
+    ret = []
+    # Wrap the state around the grid
+    upstate = ((state - n) + n_states) % n_states # Julia for the love of God please implement a proper modulo function
+    downstate = (state + n) % n_states
+    leftstate = ((state - 1) + n_states) % n_states
+    rightstate = (state + 1) % n_states
+    if action == Action.UP
+        push!(ret, (upstate, 1.0 - model.params.wind, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
+    elseif action == Action.DOWN
+        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, 1.0 - model.params.wind, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
+    elseif action == Action.LEFT
+        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, 1.0 - model.params.wind, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
+    elseif action == Action.RIGHT
+        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, 1.0 - model.params.wind, model.params.rewards_s[rightstate]))
     end
-
-    demands = zip(model.params.demand.values, model.params.demand.probabilities)
-    (make_transition(v, p) for (v, p) ∈ demands)
+    return ret
 end
 
-state_count(model::Model) = model.params.limits.max_side_length * model.params.limits.max_side_length
-action_count(model::Model) = length(model.params.actions)
+state_count(model::Model) = model.params.max_side_length * model.params.max_side_length
+action_count(model::Model, state::Int) = 4
 
 states(model::Model) = 1:state_count(model.params)
-actions(model::Model) = 1:action_count(model.params)
+actions(model::Model, state::Int) = 1:action_count(model.params, state)
 
 end # Module: GridWorld
