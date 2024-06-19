@@ -10,10 +10,10 @@ Models values of demand in `values` and probabilities in `probabilities`.
 """
 
 @enum Action begin
-    UP
-    DOWN
-    LEFT
-    RIGHT
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
 end
 
 """
@@ -35,7 +35,7 @@ end
 # ----------------------------------------------------------------
 
 """
-An inventory MDP problem simulator
+A GridWorld MDP problem simulator
 
 The states and actions are 1-based integers.
 """
@@ -46,35 +46,43 @@ end
 function transition(model::Model, state::Int, action::Int)
     n = model.params.max_side_length
     n_states = state_count(model.params)
+    compl_wind = (1.0 - model.params.wind)
+    remaining_wind = model.params.wind / 3
     ret = []
-    # Wrap the state around the grid
-    upstate = ((state - n) + n_states) % n_states # Julia for the love of God please implement a proper modulo function
-    downstate = (state + n) % n_states
-    leftstate = ((state - 1) + n_states) % n_states
-    rightstate = (state + 1) % n_states
-    if action == Action.UP
-        push!(ret, (upstate, 1.0 - model.params.wind, model.params.rewards_s[upstate]))
-        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
-        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
-        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
-    elseif action == Action.DOWN
-        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
-        push!(ret, (downstate, 1.0 - model.params.wind, model.params.rewards_s[downstate]))
-        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
-        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
-    elseif action == Action.LEFT
-        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
-        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
-        push!(ret, (leftstate, 1.0 - model.params.wind, model.params.rewards_s[leftstate]))
-        push!(ret, (rightstate, model.params.wind / 3, model.params.rewards_s[rightstate]))
-    elseif action == Action.RIGHT
-        push!(ret, (upstate, model.params.wind / 3, model.params.rewards_s[upstate]))
-        push!(ret, (downstate, model.params.wind / 3, model.params.rewards_s[downstate]))
-        push!(ret, (leftstate, model.params.wind / 3, model.params.rewards_s[leftstate]))
-        push!(ret, (rightstate, 1.0 - model.params.wind, model.params.rewards_s[rightstate]))
+    # Wrap the state around the grid 1-based indexing
+    # Julia for the love of God please implement a proper modulo function
+    upstate = state - n <= 0 ? state + n_states - n : state - n
+    downstate = (state + n) > n_states ? state - n_states + n : state + n
+    leftstate = state % n == 1 ? state + (n - 1) : state - 1
+    rightstate = state % n == 0 ? state - (n - 1) : state + 1
+    if action == Int(UP)
+        push!(ret, (upstate, compl_wind, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, remaining_wind, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, remaining_wind, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, remaining_wind, model.params.rewards_s[rightstate]))
+    elseif action == Int(DOWN)
+        push!(ret, (downstate, compl_wind, model.params.rewards_s[downstate]))
+        push!(ret, (upstate, remaining_wind, model.params.rewards_s[upstate]))
+        push!(ret, (leftstate, remaining_wind, model.params.rewards_s[leftstate]))
+        push!(ret, (rightstate, remaining_wind, model.params.rewards_s[rightstate]))
+    elseif action == Int(LEFT)
+        push!(ret, (leftstate, compl_wind, model.params.rewards_s[leftstate]))
+        push!(ret, (upstate, remaining_wind, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, remaining_wind, model.params.rewards_s[downstate]))
+        push!(ret, (rightstate, remaining_wind, model.params.rewards_s[rightstate]))
+    elseif action == Int(RIGHT)
+        push!(ret, (rightstate, compl_wind, model.params.rewards_s[rightstate]))
+        push!(ret, (upstate, remaining_wind, model.params.rewards_s[upstate]))
+        push!(ret, (downstate, remaining_wind, model.params.rewards_s[downstate]))
+        push!(ret, (leftstate, remaining_wind, model.params.rewards_s[leftstate]))
+    else
+        throw(ArgumentError("Invalid action " * string(action) * " for GridWorld."))
     end
     return ret
 end
+
+state_count(params::Parameters) = params.max_side_length * params.max_side_length
+action_count(params::Parameters, state::Int) = 4
 
 state_count(model::Model) = model.params.max_side_length * model.params.max_side_length
 action_count(model::Model, state::Int) = 4
