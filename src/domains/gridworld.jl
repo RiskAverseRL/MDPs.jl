@@ -7,7 +7,6 @@ import ...actions, ...states
 # TODO: Add tests
 """
 Models values of demand in `values` and probabilities in `probabilities`.
-For Ahmed
 """
 
 @enum Action begin
