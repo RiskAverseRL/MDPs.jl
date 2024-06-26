@@ -10,7 +10,7 @@ using MDPs.Domains
     stateok = true
     actionok = true
     transitionok = true
-
+    # What is this supposed to do?
     # for s in 1:GridWorld.state_count(params)
     #     state = GridWorld.state2state(params, s)  # Assuming state2state function exists
     #     stateok &= (GridWorld.state2state(params, state) == s)
