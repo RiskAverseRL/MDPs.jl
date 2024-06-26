@@ -4,20 +4,20 @@ using MDPs.Domains
     reward = [0.1, 0.1, 0.2, -10, -15, 100, 1, 0.5]
     max_side_length = 3
     wind = 0.2
-    params = Gridworld.Parameters(reward, max_side_length, wind)
+    params = GridWorld.Parameters(reward, max_side_length, wind)
 
     # Initialize flags for tests
     stateok = true
     actionok = true
     transitionok = true
 
-    for s in 1:Gridworld.state_count(params)
-        state = Gridworld.state2state(params, s)  # Assuming state2state function exists
-        stateok &= (Gridworld.state2state(params, state) == s)
-        for a in 1:Gridworld.action_count(params, s)
-            action = Gridworld.action2action(params, a)  # Assuming action2action function exists
-            actionok &= (Gridworld.action2action(params, action) == a)
-            transitionok &= (Gridworld.transition(params, state, action, 0).state == state + action)  # Adjust transition logic as per the actual implementation
+    for s in 1:GridWorld.state_count(params)
+        state = GridWorld.state2state(params, s)  # Assuming state2state function exists
+        stateok &= (GridWorld.state2state(params, state) == s)
+        for a in 1:GridWorld.action_count(params, s)
+            action = GridWorld.action2action(params, a)  # Assuming action2action function exists
+            actionok &= (GridWorld.action2action(params, action) == a)
+            transitionok &= (GridWorld.transition(params, state, action, 0).state == state + action)  # Adjust transition logic as per the actual implementation
         end
     end
 
@@ -25,7 +25,7 @@ using MDPs.Domains
     @test actionok
     @test transitionok
 
-    model = Gridworld.Model(params)
+    model = GridWorld.Model(params)
     simulate(model, random_π(model), 1, 10000, 500)
     model_g = make_int_mdp(model; docompress=false)
     model_gc = make_int_mdp(model; docompress=true)
