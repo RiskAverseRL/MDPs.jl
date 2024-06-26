@@ -1,10 +1,9 @@
-using MDPs
-using Test
+using MDPs.Domains
 
 @testset "Solve Gridworld" begin
-    reward = Gridworld.reward([0.1, 0.1, 0.2, -10, -15, 100, 1, 0.5])
-    max_side_length = Gridworld.max_side_length(3)
-    wind = Gridworld.wind(0.2)
+    reward = [0.1, 0.1, 0.2, -10, -15, 100, 1, 0.5]
+    max_side_length = 3
+    wind = 0.2
     params = Gridworld.Parameters(reward, max_side_length, wind)
 
     # Initialize flags for tests
