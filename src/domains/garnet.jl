@@ -43,9 +43,9 @@ function transition(model::GarnetMDP, state::Int, action::Int)
     @assert action in 1:model.A[state]
 
     next = []
-    for (s,p) in enumerate(transition[state,action,:])
+    for (s,p) in enumerate(model.transition[state][action])
         if p != 0
-            push!(next, (s,p,rewards[state,action]))
+            push!(next, (s,p,model.reward[state][action]))
         end
     end
     return next
