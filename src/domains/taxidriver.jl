@@ -1,8 +1,7 @@
 module TaxiDriver
 
-using MDPs.Domains, Test
-
-export PassengerRequest, Costs, Limits, Parameters, Model, transition, location2state, state2location, state2passenger, state_count, next_location2action, action2next_location, action_count
+import ...TabMDP, ...transition, ...state_count, ...action_count
+import ...actions, ...states
 
 """
 Struct to define the probabilities of passenger requests at each location.
@@ -13,10 +12,10 @@ struct PassengerRequest
 
     function PassengerRequest(locations, probabilities)
         length(locations) == length(probabilities) ||
-            error("Locations and probabilities must have the same length.")
+            error("Locations and probabilities must have the same length")
         all(probabilities .≥ 0.0) ||
             error("Passenger request probabilities must be non-negative.")
-        sum(probabilities) ≈ 1.0 || error("Passenger request probabilities must sum to 1.")
+        sum(probabilities) ≈ 1.0 || error("Passenger request probabilities must sum to 1")
         new(locations, probabilities)
     end
 end
@@ -50,9 +49,9 @@ end
 
 Update the location and passenger status.
 
-Starting with a `location`, the taxi moves to `next_location`. If `passenger`
+Starting with a location, the taxi moves to next_location. If passenger
 is true, the passenger is dropped off. If not, the taxi may pick up a passenger
-based on `passenger_pickup` probability.
+based on passenger_pickup probability.
 """
 function transition(params::Parameters, location::Int, passenger::Bool, next_location::Int, passenger_pickup::Bool)
     location ≥ 1 || error("Invalid location.")
@@ -66,34 +65,49 @@ function transition(params::Parameters, location::Int, passenger::Bool, next_loc
     # Compute the reward
     reward = passenger ? params.costs.ride_earnings - params.costs.move_cost : -params.costs.move_cost
 
-    (reward = reward, location = next_location, passenger transok
+    (reward = reward, location = next_location, passenger = next_passenger)
+end
+
+location2state(params::Parameters, location::Int, passenger::Bool)  =
+    (location - 1) * 2 + (passenger ? 2 : 1)
+state2location(params::Parameters, state::Int) = 
+    ((state - 1) ÷ 2) + 1
+state2passenger(params::Parameters, state::Int) = 
+    ((state - 1) % 2) == 1
+
+state_count(params::Parameters) = params.limits.max_locations * 2
+
+next_location2action(params::Parameters, next_location::Int) = next_location
+action2next_location(params::Parameters, action::Int) = action
+action_count(params::Parameters, state::Int) = params.limits.max_locations
+
+"""
+A taxi driver MDP problem simulator
+
+The states and actions are 1-based integers.
+"""
+struct Model <: TabMDP
+    params :: Parameters
+end
+
+function transition(model::Model, state::Int, action::Int)
+    location = state2location(model.params, state)
+    passenger = state2passenger(model.params, state)
+    next_location = action2next_location(model.params, action)
+
+    function make_transition(v, p)
+        t = transition(model.params, location, passenger, next_location, v)
+        (location2state(model.params, t.location, t.passenger), p, t.reward)
     end
+
+    passenger_requests = zip(model.params.passenger_request.locations, model.params.passenger_request.probabilities)
+    (make_transition(passenger_pickup, p) for (passenger_pickup, p) ∈ passenger_requests)
 end
 
-@test locationok
-@test passengerok
-@test transok
+state_count(model::Model) = state_count(model.params)
+action_count(model::Model, state::Int) = action_count(model.params, state)
 
-model = TaxiDriver.Model(params)
-simulate(model, random_π(model), 1, 10000, 500)
-model_g = make_int_mdp(model; docompress=false)
-model_gc = make_int_mdp(model; docompress=true)
+states(model::Model) = 1:state_count(model.params)
+actions(model::Model, state::Int) = 1:action_count(model.params, state)
 
-v1 = value_iteration(model, InfiniteH(0.95); ϵ=1e-10)
-v2 = value_iteration(model_g, InfiniteH(0.95); ϵ=1e-10)
-v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ=1e-10)
-v4 = policy_iteration(model_gc, 0.95)
-
-# Ensure value functions are close
-V = hcat(v1.value, v2.value[1:end-1], v3.value[1:end-1], v4.value[1:end-1])
-@test map(x -> x[2] - x[1], mapslices(extrema, V; dims=2)) |> maximum ≤ 1e-6
-
-# Ensure policies are identical
-p1 = greedy(model, InfiniteH(0.95), v1.value)
-p2 = greedy(model_g, InfiniteH(0.95), v2.value)
-p3 = greedy(model_gc, InfiniteH p4 = v4.policy
-
-P = hcat(p1, p2[1:end-1], p3[1:end-1], p4[1:end-1])
-@test all(mapslices(allequal, P; dims=2))
-end
 end # Module: TaxiDriver
