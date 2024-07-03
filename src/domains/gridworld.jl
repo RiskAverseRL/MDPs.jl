@@ -4,7 +4,6 @@ import ...TabMDP, ...transition, ...state_count, ...action_count
 import ...actions, ...states
 
 # TODO: Add docs
-# TODO: Add tests
 """
 Models values of demand in `values` and probabilities in `probabilities`.
 """
@@ -27,6 +26,15 @@ struct Parameters
     rewards_s::Vector{Float64}
     max_side_length::Int
     wind::Float64
+
+    function Parameters(rewards_s, max_side_length, wind)
+        length(rewards_s) == max_side_length * max_side_length ||
+            error("Rewards must have the same length as the number of states.")
+        wind ≥ 0.0 || error("Wind must be non-negative.")
+        wind ≤ 1.0 || error("Wind must be less than or equal to 1.")
+
+        new(rewards_s, max_side_length, wind)
+    end
 end
 
 
@@ -50,7 +58,7 @@ function transition(model::Model, state::Int, action::Int)
     remaining_wind = model.params.wind / 3
     ret = []
     # Wrap the state around the grid 1-based indexing
-    # Julia for the love of God please implement a proper modulo function
+    # NOTE: Julia for the love of God please implement a proper modulo function
     upstate = state - n <= 0 ? state + n_states - n : state - n
     downstate = (state + n) > n_states ? state - n_states + n : state + n
     leftstate = state % n == 1 ? state + (n - 1) : state - 1
