@@ -53,7 +53,7 @@ Starting with a location, the taxi moves to next_location. If passenger
 is true, the passenger is dropped off. If not, the taxi may pick up a passenger
 based on passenger_pickup probability.
 """
-function transition(params::Parameters, location::Int, passenger::Bool, next_location::Int, passenger_pickup::Bool)
+function transition(params::Parameters, location::Int, passenger::Bool, next_location::Int, passenger_pickup::Int)
     location ≥ 1 || error("Invalid location.")
     location ≤ params.limits.max_locations || error("Location over limit.")
     next_location ≥ 1 || error("Invalid next location.")
@@ -68,7 +68,7 @@ function transition(params::Parameters, location::Int, passenger::Bool, next_loc
     (reward = reward, location = next_location, passenger = next_passenger)
 end
 
-location2state(params::Parameters, location::Int, passenger::Bool)  =
+location2state(params::Parameters, location::Int, passenger::Int)  =
     (location - 1) * 2 + (passenger ? 2 : 1)
 state2location(params::Parameters, state::Int) = 
     ((state - 1) ÷ 2) + 1
