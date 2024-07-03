@@ -1,6 +1,7 @@
 module Garnet
 
-import ...TabMDP, ...transition, ...state_count, ...action_count, StatsBase, Distributions
+import ...TabMDP, ...transition, ...state_count, ...action_count#, StatsBase, Distributions
+import ...actions, ...states
 # ----------------------------------------------------------------
 # A Garnet MDP
 # ----------------------------------------------------------------
@@ -11,19 +12,20 @@ struct GarnetMDP <: TabMDP
     S::Int64
     A::Vector{Int64}
 
+    """
     function GarnetMDP(numStates::Int, numActions::Vector{Int}, nBranch::Float64, minReward::Int, maxReward::Int)
         S = numStates
         A = numActions
         reward = Vector{Vector{Float64}}([])
         transition = Vector{Vector{Vector{Float64}}}([])
-        dist = Exponential(1)
+        dist = Distributions.Exponential(1)
         sout = Int(round(nBranch*S))
         for i in 1:numStates
             r = Vector{Float64}([])
             p = Vector{Vector{Float64}}([])
             for j in 1:numActions[i]
                 push!(r,rand(minReward:maxReward))
-                inds = sample(1:S,sout,replace=false)
+                inds = StatsBase.sample(1:S,sout,replace=false)
                 z = rand(dist,sout)
                 z /= sum(z)
                 pp = zeros(S)
@@ -35,6 +37,7 @@ struct GarnetMDP <: TabMDP
         end
         new(reward,transition,S,A)
     end
+    """
 end
 
 
