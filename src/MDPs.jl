@@ -51,6 +51,8 @@ include("domains/machine.jl")
 export Machine
 include("domains/gambler.jl")
 export Gambler
+include("domains/taxidriver.jl")
+export TaxiDriver
 end
 export Domains
 # --------------------
