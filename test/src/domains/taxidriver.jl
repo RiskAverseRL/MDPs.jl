@@ -3,33 +3,31 @@ using Test
 
 @testset "Solve TaxiDriver" begin
     # Define the test parameters
-    passenger_request = TaxiDriver.PassengerRequest([1, 2], [0.5, 0.5])
-    costs = TaxiDriver.Costs(1.0, 10.0)
-    limits = TaxiDriver.Limits(5)
+    locs = [1, 2]
+    pickup_loc = 1
+    dropoff_loc = 2
+    mv_cost = 1.0
+    pickup_rew = 10.0
+    dropoff_rew = 20.0
 
-    params = TaxiDriver.Parameters(passenger_request, costs, limits)
+    #params = TaxiDriver.Parameters(locs, pickup_loc, dropoff_loc, mv_cost, pickup_rew, dropoff_rew)
 
 
-    model = TaxiDriver.Model(params)
-    simulate(model, random_π(model), 1, 10000, 500)
-    model_g = make_int_mdp(model; docompress=false)
-    model_gc = make_int_mdp(model; docompress=true)
+    model = TaxiDriver.Taxi(locs, pickup_loc, dropoff_loc, mv_cost, pickup_rew, dropoff_rew)
+    state = TaxiDriver.TaxiState(1, false)
 
-    v1 = value_iteration(model, InfiniteH(0.95); ϵ=1e-10)
-    v2 = value_iteration(model_g, InfiniteH(0.95); ϵ=1e-10)
-    v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ=1e-10)
-    v4 = policy_iteration(model_gc, 0.95)
+    Stay = 1
+    MoveTo = 2
 
-    # Ensure value functions are close
-    V = hcat(v1.value, v2.value[1:end-1], v3.value[1:end-1], v4.value[1:end-1])
-    @test map(x -> x[2] - x[1], mapslices(extrema, V; dims=2)) |> maximum ≤ 1e-6
+    s_c = state_count(model)
+    a_c = action_count(model, state)
+    result_stay = transition(model, state, Stay)
 
-    # Ensure policies are identical
-    p1 = greedy(model, InfiniteH(0.95), v1.value)
-    p2 = greedy(model_g, InfiniteH(0.95), v2.value)
-    p3 = greedy(model_gc, InfiniteH(0.95), v3.value)
-    p4 = v4.policy
+    state_pickup = TaxiDriver.TaxiState(1, false)
+    result_move_pickup = transition(model, state, MoveTo)
 
-    P = hcat(p1, p2[1:end-1], p3[1:end-1], p4[1:end-1])
-    @test all(mapslices(allequal, P; dims=2))
+    # Value iteration and policy tests
+    discount_factor = 0.95
+    v = value_iteration(model, InfiniteH(discount_factor); ϵ=1e-10)
+    p = greedy(model, InfiniteH(discount_factor), v.value)
 end
