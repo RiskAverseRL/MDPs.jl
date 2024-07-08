@@ -45,6 +45,8 @@ export Transition
 module Domains
 include("domains/simple.jl")
 export Simple
+include("domains/garnet.jl")
+export Garnet
 include("domains/inventory.jl")
 export Inventory
 include("domains/machine.jl")
