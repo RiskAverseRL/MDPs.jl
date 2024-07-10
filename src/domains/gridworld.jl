@@ -3,7 +3,7 @@ module GridWorld
 import ...TabMDP, ...transition, ...state_count, ...action_count
 import ...actions, ...states
 
-# TODO: Add docs
+# TODO: Add docs, with method signatures
 """
 Models values of demand in `values` and probabilities in `probabilities`.
 """
