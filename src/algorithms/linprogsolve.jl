@@ -4,7 +4,7 @@ using HiGHS, JuMP
 Implments the linear programming method of solving an MDP "model" with an infinite horizon and discount factor γ. The function utilizes the HiGHS optimizer which is free to use.
 """
 
-function linear_program_solve(model::TabMDP, γ::Float)
+function linear_program_solve(model::TabMDP, γ::Number)
     0 ≤ γ < 1 || error("γ must be between 0 and 1")
     lpm = Model(HiGHS.Optimizer)
     set_silent(lpm)
