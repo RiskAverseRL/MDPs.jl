@@ -1,12 +1,20 @@
 using JuMP
 
+# ----------------------------------------------------------------
+# Linear Program Solver
+# ----------------------------------------------------------------
+
+
 """
-Implments the linear programming method of solving an MDP "model" with an infinite horizon and discount factor γ. The function utilizes the HiGHS optimizer which is free to use.
+lp_solve(model, γ, lpm)
+
+Implements the linear program primal problem for an MDP `model` with a discount factor `γ`.
+It uses the JuMP model `lpm` as the linear program solver and returns the state values
+found by `lpm`.
 """
 
-function lp_solve(model::TabMDP, γ::Number, m)
+function lp_solve(model::TabMDP, γ::Number, lpm)
     0 ≤ γ < 1 || error("γ must be between 0 and 1")
-    lpm = Model(m)
     set_silent(lpm)
     n = state_count(model)
     @variable(lpm, v[1:n])
