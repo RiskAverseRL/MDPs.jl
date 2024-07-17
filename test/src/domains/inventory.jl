@@ -1,4 +1,5 @@
 using MDPs.Domains
+import HiGHS
 
 @testset "Solve Inventory" begin
 
@@ -36,13 +37,13 @@ using MDPs.Domains
     v2 = value_iteration(model_g, InfiniteH(0.95); ϵ = 1e-10)
     v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ = 1e-10)
     v4 = policy_iteration(model_gc, 0.95)
-
+    #v5 = lp_solve(g, .95, HiGHS.Optimizer)
 
     # note that the IntMDP does not have terminal states,
     # so the last action will not be -1
 
     #make sure value functions are close
-    V = hcat(v1.value, v2.value[1:(end-1)], v3.value[1:(end-1)], v4.value[1:(end-1)])
+    V = hcat(v1.value, v2.value[1:(end-1)], v3.value[1:(end-1)], v4.value[1:(end-1)], v5)
     @test map(x->x[2] - x[1], mapslices(extrema, V; dims = 2)) |> maximum ≤ 1e-6
 
     # make sure policies are identical
@@ -50,6 +51,7 @@ using MDPs.Domains
     p2 = greedy(model_g, InfiniteH(0.95),  v2.value)
     p3 = greedy(model_gc, InfiniteH(0.95), v3.value)
     p4 = v4.policy
+    p5 = greedy(model, InfiniteH(0.95), v5)
 
     P = hcat(p1, p2[1:(end-1)], p3[1:(end-1)], p4[1:(end-1)])
     @test all(mapslices(allequal, P; dims = 2))

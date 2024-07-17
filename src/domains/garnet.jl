@@ -18,6 +18,11 @@ struct GarnetMDP <: TabMDP
     # TODO: add a constructor that checks for consistency
 end
 
+"""
+A Garnet MDP is a tabular MDP where the number of next states available from any current state is a fixed proportion of the total number of states in the model.
+This proportion is called "nbranch" and it must between 0 and 1.
+"""
+
 function make_garnet(S::Integer, A::AbstractVector{Int}, nbranch::Number, min_reward::Integer, max_reward::Integer)
 
     0.0 ≤ nbranch ≤ 1.0 || error("nbranch must be in [0,1]")
