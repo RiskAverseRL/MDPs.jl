@@ -37,7 +37,7 @@ import HiGHS
     v2 = value_iteration(model_g, InfiniteH(0.95); ϵ = 1e-10)
     v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ = 1e-10)
     v4 = policy_iteration(model_gc, 0.95)
-    #v5 = lp_solve(g, .95, HiGHS.Optimizer)
+    v5 = lp_solve(model_g, .95, HiGHS.Optimizer)
 
     # note that the IntMDP does not have terminal states,
     # so the last action will not be -1
