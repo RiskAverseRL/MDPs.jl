@@ -102,7 +102,7 @@ struct TabPolicySD <: TabPolicyStationary
     π :: Vector{Int}
 end
 
-take_action(π::TabPolicySD, s::Int) = π[s]
+take_action(π::TabPolicySD, s::Int) = π.π[s]
 
 """
 Markov deterministic policy for tabular MDPs. The policy `π` has an outer array over time
