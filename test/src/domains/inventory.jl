@@ -8,7 +8,6 @@ using MDPs.Domains
     limits = Inventory.Limits(50, 10, 30)
     params = Inventory.Parameters(demand, costs, 10, limits)
 
-    
     # do not want to have a million "fake" tests
     stockok = true
     orderok = true
@@ -37,7 +36,6 @@ using MDPs.Domains
     v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ = 1e-10)
     v4 = policy_iteration(model_gc, 0.95)
 
-
     # note that the IntMDP does not have terminal states,
     # so the last action will not be -1
 
@@ -53,5 +51,4 @@ using MDPs.Domains
 
     P = hcat(p1, p2[1:(end-1)], p3[1:(end-1)], p4[1:(end-1)])
     @test all(mapslices(allequal, P; dims = 2))
-
 end

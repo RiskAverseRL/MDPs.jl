@@ -114,6 +114,22 @@ end
 
 take_action(π::TabPolicyMD, t::Int, s::Int) = π.π[t][s]
 
+make_initial_sampler(model::MDP{S,A}, initial::S) where {S,A} =
+    () -> initial
+
+function make_initial_sampler(model::MDP{S,A},
+                              initial::AbstractVector{<:Number}) where{S,A}
+    
+    sum(initial) ≈ 1.0 || error("initial distribution does not sum to 1")
+    minimum(initial) ≥ 0.0 || error("initial distribution is not non-negative")
+  
+    cumprobs = cumsum(initial)
+    allstates = states(model)
+    
+    () -> allstates[searchsortedfirst(cumprobs, rand())]
+end
+    
+
 """ 
     simulate(model, π, initial, horizon, episodes; [stationary = true])
 
@@ -128,13 +144,16 @@ is provided as a function, then the parameter `stationary` is used.
 There are horizon+1 states generated in every episode including the terminal
 state at T+1.
 
+The initial state `initial` should either be of a type `S` or can also be a vector
+that represents the distribution over the states
+
 The function requires that each state and action transition
 to a reasonable small number of next states.
 
 ## See Also
 `cumulative` to compute the cumulative rewards
 """
-function simulate(model::MDP{S,A}, π::Policy{S,A}, initial::S,
+function simulate(model::MDP{S,A}, π::Policy{S,A}, initial,
                   horizon::Integer, episodes::Integer) where {S,A}
 
     states = fill(zero(S), horizon+1, episodes)
@@ -142,10 +161,12 @@ function simulate(model::MDP{S,A}, π::Policy{S,A}, initial::S,
     # there is no reward for the last transition
     rewards = fill(NaN, horizon, episodes)
 
+    init_sampler = make_initial_sampler(model, initial)
     Threads.@threads for run ∈ 1:episodes
-        states[1, run] = initial
-        local internal = make_internal(model, π, initial)
-        actions[1,run] = take_action(π, internal, initial)
+        local initstate::S = init_sampler()    # sample initial state
+        local internal = make_internal(model, π, initstate)
+        states[1, run] = initstate
+        actions[1,run] = take_action(π, internal, initstate)
         for t ∈ 2:(horizon+1)
             # a streaming approach to sampling the next state
             prob = rand()            
@@ -170,20 +191,20 @@ function simulate(model::MDP{S,A}, π::Policy{S,A}, initial::S,
     (states = states, actions = actions, rewards = rewards)
 end
 
-function simulate(model::TabMDP, π::Vector{Int}, initial::Int,
+function simulate(model::TabMDP, π::Vector{Int}, initial,
                   horizon::Integer, episodes::Integer)
     length(π) == state_count(model) || error("Policy length must match state count.")
     simulate(model, TabPolicySD(π), initial, horizon, episodes)
 end
 
 # tabular states only
-function simulate(model::TabMDP, π::Vector{Vector{Int}}, initial::Int,
+function simulate(model::TabMDP, π::Vector{Vector{Int}}, initial,
                   horizon::Integer, episodes::Integer) 
     horizon ≤ length(π) || error("Horizon must be at most policy length.")
     simulate(model, TabPolicyMD(π), initial, horizon, episodes)
 end
 
-function simulate(model::MDP{S,A}, π::Function, initial::S,
+function simulate(model::MDP{S,A}, π::Function, initial,
                   horizon::Integer, episodes::Integer;
                   stationary = true) where {S,A}
     if stationary
@@ -192,6 +213,7 @@ function simulate(model::MDP{S,A}, π::Function, initial::S,
         return simulate(model, FPolicyM{S,A}(π), initial, horizon, episodes)
     end
 end
+
 
 """
     random_π(model)
