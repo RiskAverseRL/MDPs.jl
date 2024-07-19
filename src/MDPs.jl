@@ -35,7 +35,7 @@ include("algorithms/policyiteration.jl")
 export policy_iteration, policy_iteration_sparse
 
 include("algorithms/linprogsolve.jl")
-export linear_program_solve
+export lp_solve
 
 include("simulation.jl")
 export simulate, random_π

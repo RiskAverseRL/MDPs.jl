@@ -1,4 +1,5 @@
 using MDPs.Domains
+import HiGHS, JuMP
 
 @testset "Solve Garnet" begin
 
@@ -11,7 +12,7 @@ using MDPs.Domains
     v2 = value_iteration(g1, InfiniteH(0.95); ϵ=1e-10)
     v3 = value_iteration(g2, InfiniteH(0.95); ϵ=1e-10)
     v4 = policy_iteration(g2, 0.95)
-    v5 = linear_program_solve(g, .95)
+    v5 = lp_solve(g, .95, JuMP.Model(HiGHS.Optimizer))
 
     # Ensure value functions are close
     V = hcat(v1.value, v2.value[1:end-1], v3.value[1:end-1], v4.value[1:end-1], v5)
