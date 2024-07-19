@@ -15,8 +15,7 @@ function linear_program_solve(model::TabMDP, objective::InfiniteH, optimizer)
     for s in 1:n
         m = action_count(model,s)
         for a in 1:m
-            snext = transition(model,s,a)
-            @constraint(lpm, v[s] ≥ sum(sp[2]*(sp[3]+objective.γ*v[sp[1]]) for sp in snext))
+            @constraint(lpm, v[s] ≥ sum(sp[2]*(sp[3]+objective.γ*v[sp[1]]) for sp in transition(model,s,a)))
         end
     end
     optimize!(lpm)
