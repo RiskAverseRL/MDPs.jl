@@ -19,13 +19,15 @@ function lp_solve(model::TabMDP, γ::Number, lpm)
     n = state_count(model)
     @variable(lpm, v[1:n])
     @objective(lpm,Min, sum(v[1:n]))
+    π::Vector{Vector{ConstraintRef}} = []
     for s in 1:n
         m = action_count(model,s)
+        π_s::Vector{ConstraintRef} = []
         for a in 1:m
-            snext = transition(model,s,a)
-            @constraint(lpm, v[s] ≥ sum(sp[2]*(sp[3]+γ*v[sp[1]]) for sp in snext))
+            push!(π_s, @constraint(lpm, v[s] ≥ sum(sp[2]*(sp[3]+γ*v[sp[1]]) for sp in transition(model,s,a))))
         end
+        push!(π, π_s)
     end
     optimize!(lpm)
-    return value.(v)
+    (value = value.(v), policy = map(x->argmax(dual.(x)), π))
 end
