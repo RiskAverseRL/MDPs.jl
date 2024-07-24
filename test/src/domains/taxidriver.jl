@@ -1,7 +1,7 @@
 using MDPs.Domains
 using Test
 
-@testset "Solve TaxiDriver" begin
+@testset "Solve Taxi" begin
     # Define the test parameters
     locs = [1, 2]
     pickup_loc = 1
@@ -20,8 +20,8 @@ using Test
     MoveTo = 2
 
     s_c = state_count(model)
-    a_c = action_count(model, state)
-    result_stay = transition(model, state, Stay)
+    a_c = action_count(model, 2)
+    result_stay = transition(model, 2, 1)
 
     state_pickup = TaxiDriver.TaxiState(1, false)
     result_move_pickup = transition(model, state, MoveTo)
