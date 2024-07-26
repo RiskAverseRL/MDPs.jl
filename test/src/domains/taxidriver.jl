@@ -1,30 +1,13 @@
 using MDPs.Domains
-using Test
 
-@testset "Solve Taxi" begin
-    # Define the test parameters
-    locs = [1, 2]
-    pickup_loc = 1
-    dropoff_loc = 2
-    mv_cost = 1.0
-    pickup_rew = 10.0
-    dropoff_rew = 20.0
+@testset "Solve TaxiDriver.Taxi" begin
+    pickup_rates = [.9,.3,.1]
+    destination_prob = [0.0 .8 .2; .6 0.0 .4; .1 .9 0.0]
+    transition_cost = [0.0 1.5 2.0; 3.0 0.0 1.0; 2.0 1.5 0.0]
+    transition_profit = [0.0 8.5 10.0; 9.0 0.0 12.0; 10.0 7.0 0.0]
+    num_locs = 3
 
-    #params = TaxiDriver.Parameters(locs, pickup_loc, dropoff_loc, mv_cost, pickup_rew, dropoff_rew)
-
-
-    model = TaxiDriver.Taxi(locs, pickup_loc, dropoff_loc, mv_cost, pickup_rew, dropoff_rew)
-    state = TaxiDriver.TaxiState(1, false)
-
-    Stay = 1
-    MoveTo = 2
-
-    s_c = state_count(model)
-    a_c = action_count(model, 2)
-    result_stay = transition(model, 2, 1)
-
-    state_pickup = TaxiDriver.TaxiState(1, false)
-    result_move_pickup = transition(model, state, MoveTo)
+    model = TaxiDriver.Taxi(pickup_rates, destination_prob,transition_cost, transition_profit,num_locs )
 
     # Value iteration and policy tests
     discount_factor = 0.95
