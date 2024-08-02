@@ -109,7 +109,7 @@ function transition(model::RuinTransient, state::Int, action::Int)
         lose_state = max(1, (state - 1) - (action - 1) + 1)
 
         # reward 1.0 if an donly if we achieve the target capital
-        win_reward = win_state == absorbing ? 1.0 : 0
+        win_reward = win_state == absorbing ? 1.0 : 0.0
 
         # the reward is 0 when we lose
         (mt(win_state, model.win, win_reward), mt(lose_state, 1.0 - model.win, 0.))
