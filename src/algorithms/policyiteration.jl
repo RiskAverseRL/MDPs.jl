@@ -33,7 +33,7 @@ function policy_iteration(model::TabMDP, γ::Real; iterations::Int = 1000)
     for it ∈ 1:iterations
         policyold .= policy
         greedy!(policy, model, InfiniteH(γ), v_π)
-        mrp!(IP_π, r_π, model, policy);
+        mrp!(IP_π, r_π, model, policy)
         # Solve: v_π .= (I - γ * P_π) \ r_π
         lmul!(-γ, IP_π)
         _add_identity!(IP_π)
