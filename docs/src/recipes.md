@@ -71,4 +71,10 @@ using CSV
 model = Gambler.Ruin(0.7, 10)
 domainoutput = MDPs.save_mdp(DataFrame, model)
 CSV.write("output_gambler.csv", domainoutput)
+
+1
+
+# output
+
+1
 ```
