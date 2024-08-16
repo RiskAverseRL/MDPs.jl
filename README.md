@@ -22,18 +22,36 @@ A set of tools for solving primarily tabular Markov Decision Processes. The proj
 The project is build around the following main data structures:
 
 - `MDP`: A structure that supports Bellman updates and value function and qvalue computation. The model assumes that the number of actions is discrete and sufficiently small.
-- `TabMDP`: A structure that specialized MDPs to tabular state spaces. The states and actions may have arbitrary data types
-- `IntMDP`: A generic tabular MDP which has states and actions indexed by integers. States 0 and below are assumed to be terminal and allow no actions or transitions
+- `TabMDP`: A structure that specialized MDPs to tabular state spaces. The states and actions may have arbitrary data types.
+- `IntMDP`: A generic tabular MDP which has states and actions indexed by integers. States 0 and below are assumed to be terminal and allow no actions or transitions.
 
 One of the main goals of the project is to support exploration of algorithms for solving various reinforcement learning objectives. To achieve this goal, the project involves a number of abstraction. The benefit of this approach is that one can implement new dynamic programming algorithm with a relatively high degree of code reuse.
 
 ## Installation
 
-The package is not avaialble from the julia repository. You can install it directly from github:
+### Use the package
+
+The package is not available from the julia repository. You can install it directly from github:
 
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/RiskAverseRL/MDPs.jl")
+```
+
+### Develop the package
+
+First run this in the command line
+
+```bash
+git clone https://riskaverserl.github.io/MDPs.jl
+cd MDPs.jl
+```
+
+Then, in Julia, add the package in the development mode:
+
+```julia
+using Pkg
+Pkg.develop(".")
 ```
 
 ## Similar packages
