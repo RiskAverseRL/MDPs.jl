@@ -53,6 +53,20 @@ struct FiniteH <: MarkovDet
     end
 end
 
+
+"""
+Total reward criterion. The objective is to maximize the sum
+of the rewards. The model assumes that there is a terminal state,
+which must
+
+1) have a single action,
+2) transition to itself,
+3) have a reward of 0. 
+"""
+struct TotalReward <: StationaryDet
+    terminal_state :: Int 
+end
+
 """
     horizon(objective)
 

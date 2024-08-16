@@ -44,7 +44,7 @@ action_count(model::Ruin, state::Int) = state < model.max_capital + 1 ? state : 
 
 function transition(model::Ruin, state::Int, action::Int)
     1 ≤ state ≤ model.max_capital + 1 || error("invalid state")
-    1 ≤ action ≤ state_count || error("invalid action")
+    1 ≤ action ≤ action_count(model, state) || error("invalid action")
 
     if state == 1  # overall loss state
         (mt(1, 1.0, 0.0),)
@@ -98,7 +98,7 @@ function transition(model::RuinTransient, state::Int, action::Int)
     absorbing :: Int = model.max_capital + 1
     
     1 ≤ state ≤ absorbing || error("invalid state")
-    1 ≤ action ≤ state_count || error("invalid action")
+    1 ≤ action ≤ action_count(model, state) || error("invalid action")
 
     if state == 1  # broke
         (mt(absorbing, 1.0, -1.0),)
