@@ -43,7 +43,7 @@ Pkg.add(url="https://github.com/RiskAverseRL/MDPs.jl")
 First run this in the command line
 
 ```bash
-git clone https://riskaverserl.github.io/MDPs.jl
+git clone git@github.com:RiskAverseRL/MDPs.jl.git
 cd MDPs.jl
 ```
 
