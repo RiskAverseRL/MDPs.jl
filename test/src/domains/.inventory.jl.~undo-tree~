@@ -1,0 +1,9 @@
+(undo-tree-save-format-version . 1)
+"7f5c20e0493d52a78b3976a36ddef4420bed61da"
+[nil nil nil nil (26303 463 21508 884000) 0 nil]
+([nil nil ((#("=======
+>>>>>>> main
+" 0 7 (face smerge-markers fontified t) 7 8 (face nil fontified t) 8 21 (face smerge-markers fontified t)) . 1463) (undo-tree-id3 . -8) (undo-tree-id4 . -8) (undo-tree-id5 . -8) (undo-tree-id6 . -8) (undo-tree-id7 . -21) (undo-tree-id8 . -21) (undo-tree-id9 . -21) (undo-tree-id10 . -21) (undo-tree-id11 . -8) (undo-tree-id12 . -8) (undo-tree-id13 . -21) (undo-tree-id14 . -20) 1471 (t 26303 431 259432 314000)) nil (26303 463 21506 379000) 0 nil])
+([nil current ((#("<<<<<<< HEAD
+" 0 1 (face smerge-markers smerge-refine-part (13 . 2) fontified t) 1 13 (face smerge-markers fontified t)) . 1391) (undo-tree-id0 . -13) (undo-tree-id1 . -12) (undo-tree-id2 . -13)) nil (26303 463 21492 460000) 0 nil])
+nil

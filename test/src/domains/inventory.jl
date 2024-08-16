@@ -9,7 +9,6 @@ import HiGHS, JuMP
     limits = Inventory.Limits(50, 10, 30)
     params = Inventory.Parameters(demand, costs, 10, limits)
 
-    
     # do not want to have a million "fake" tests
     stockok = true
     orderok = true
@@ -55,5 +54,4 @@ import HiGHS, JuMP
 
     P = hcat(p1, p2[1:(end-1)], p3[1:(end-1)], p4[1:(end-1)])
     @test all(mapslices(allequal, P; dims = 2))
-
 end

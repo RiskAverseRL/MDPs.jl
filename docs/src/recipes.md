@@ -58,3 +58,17 @@ state_count(M)
 
 3
 ```
+
+
+## Saving an MDP to a file
+
+```jldoctest
+using MDPs
+using DataFrames
+using MDPs.Domains
+using CSV
+
+model = Gambler.Ruin(0.7, 10)
+domainoutput = MDPs.save_mdp(DataFrame, model)
+CSV.write("output_gambler.csv", domainoutput)
+```
