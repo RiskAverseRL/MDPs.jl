@@ -34,6 +34,9 @@ export mrp!, mrp, mrp_sparse
 include("algorithms/policyiteration.jl")
 export policy_iteration, policy_iteration_sparse
 
+include("algorithms/linprogsolve.jl")
+export lp_solve
+
 include("simulation.jl")
 export simulate, random_π
 export Policy, PolicyStationary, PolicyMarkov
@@ -45,12 +48,16 @@ export Transition
 module Domains
 include("domains/simple.jl")
 export Simple
+include("domains/garnet.jl")
+export Garnet
 include("domains/inventory.jl")
 export Inventory
 include("domains/machine.jl")
 export Machine
 include("domains/gambler.jl")
 export Gambler
+include("domains/gridworld.jl")
+export GridWorld
 end
 export Domains
 # --------------------
