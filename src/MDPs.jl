@@ -2,10 +2,11 @@ module MDPs
 
 include("objectives.jl")
 export InfiniteH, FiniteH, Markov, Stationary, MarkovDet, StationaryDet
+export TotalReward
 
 include("models/mdp.jl")
 export MDP
-export getnext, transition, isterminal
+export getnext, transition
 export valuefunction
 
 
@@ -36,6 +37,10 @@ export policy_iteration, policy_iteration_sparse
 
 include("algorithms/linprogsolve.jl")
 export lp_solve
+
+include("algorithms/transient.jl")
+export lp_solve, anytransient, alltransient
+export isterminal
 
 include("simulation.jl")
 export simulate, random_π

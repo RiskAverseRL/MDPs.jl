@@ -56,15 +56,12 @@ end
 
 """
 Total reward criterion. The objective is to maximize the sum
-of the undiscounted rewards. The model assumes that there is a terminal
- state, which must satisfy that it
+of the undiscounted rewards. 
 
-1) has a single action,
-2) transitions to itself,
-3) has a reward 0. 
+This objective can generally only be applied to transient states,
+which have a terminal state; see `isterminal` for more details.
 """
 struct TotalReward <: StationaryDet
-    terminal_state :: Int 
 end
 
 """

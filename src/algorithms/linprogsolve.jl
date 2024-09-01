@@ -6,17 +6,27 @@ using JuMP
 
 
 """
-    lp_solve(model, γ, lpm, [silent = true])
+    lp_solve(model, γ, lpmf, [silent = true])
 
 Implements the linear program primal problem for an MDP `model` with a discount factor `γ`.
 It uses the JuMP model `lpm` as the linear program solver and returns the state values
-found by `lpm`. 
+found by `lpmf`. The `lpmf` is a factory that can be passed to `JuMP.Model`. 
+
+The function needs to be provided with a solver. See the example below.
+
+# Example
+
+    using MDPs, HiGHS
+    model = Domains.Gambler.Ruin(0.5, 10)
+    lp_solve(model, 0.9, HiGHS.Optimizer)
 """
 
-function lp_solve(model::TabMDP, obj::InfiniteH, lpm; silent = true)
+function lp_solve(model::TabMDP, obj::InfiniteH, lpm::JuMP.Model; silent = true)
     γ = discount(obj)
     0 ≤ γ < 1 || error("γ must be between 0 and 1.")
 
+    
+    lpm = Model(lpmf)
     silent && set_silent(lpm)
     n = state_count(model)
     
@@ -31,10 +41,8 @@ function lp_solve(model::TabMDP, obj::InfiniteH, lpm; silent = true)
     end
     
     optimize!(lpm)
-
-    if !is_solved_and_feasible(lpm; dual = true)
+    is_solved_and_feasible(lpm; dual = true) ||
         error("Failed to solve the MDP linear program")
-    end
     
     (value = value.(v),
      policy = map(x->argmax(dual.(x)), u))

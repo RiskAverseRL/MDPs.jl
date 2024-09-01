@@ -8,9 +8,9 @@ mt(st, prob,rew) =
     (Int(st), Float64(prob), Float64(rew))::Tuple{Int, Float64, Float64}
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
 # Discounted ruin
-# ------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
 
 
 """
@@ -58,9 +58,9 @@ function transition(model::Ruin, state::Int, action::Int)
 end
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
 # Transient ruin
-# ------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
 
 
 """
@@ -72,41 +72,58 @@ some terminal capital and `0` otherwise. State `max_capital+1` is an absorbing w
 in which `1` is received forever.
 
 - Capital = `state - 1`
-- Bet     = `action - 1` 
 
-Available actions are `1`, ..., `state`.
+If `noop = true` then the available actions are `1, ..., capital+1` and bet = `action - 1`. This
+allows a bet of 0 which is not a transient policy. 
 
-Special states: `state=1` is broke and `state=max_capital+1` is an absorbing state.
+If `noop = false` then the available actions are `1, ..., capital` and bet = `action `.
 
-The reward is `-1` when the gambler goes broke and `+1` when it achieves the target capital.
+Special states: `state=1` is broke and `state=max_capital+1` is maximal capital. Both of the
+states are absorbing/terminal.
+
+The reward is `0` when the gambler goes broke and `+1` when it achieves the target capital. The
+difference from `Ruin` is that the reward is not received in the terminal state.  
 """
 struct RuinTransient <: TabMDP
     win :: Float64
     max_capital :: Int
+    noop :: Bool
 
-    function RuinTransient(win::Number, max_capital::Integer)
+    function RuinTransient(win::Number, max_capital::Integer, noop::Bool)
         zero(win) ≤ win ≤ one(win) || error("Win probability must be in [0,1]")
         max_capital ≥ one(max_capital) || error("Max capital must be positive")
-        new(win, max_capital)
+        new(win, max_capital, noop)
     end
 end
 
 state_count(model::RuinTransient) = model.max_capital + 1
-action_count(model::RuinTransient, state::Int) = state < model.max_capital + 1 ? state : 1 # only one action in the terminal state
+
+function action_count(model::RuinTransient, state::Int)
+    ns = state_count(model)
+    @assert state ≥ 1 && state ≤ ns 
+    if state == 1 || state == ns 
+        1
+    else
+        capital = state - 1
+        model.noop ? model.max_capital + 1 : model.max_capital
+    end
+end
 
 function transition(model::RuinTransient, state::Int, action::Int)
-    absorbing :: Int = model.max_capital + 1
+    absorbing = state_count(model)  # the "last" state
     
     1 ≤ state ≤ absorbing || error("invalid state")
     1 ≤ action ≤ action_count(model, state) || error("invalid action")
 
     if state == 1  # broke
-        (mt(absorbing, 1.0, -1.0),)
-    elseif state == absorbing   # absorbing terminal state; no reward
-        (mt(state, 1.0, 1.0),)
+        (mt(state, 1.0, 0.0),)
+    elseif state == model.max_capital+1   # absorbing terminal state; no reward
+        (mt(state, 1.0, 0.0),)
     else
-        win_state = min(model.max_capital + 1, (state - 1) + (action - 1) + 1)
-        lose_state = max(1, (state - 1) - (action - 1) + 1)
+        bet = model.noop ? action - 1 : action
+        
+        win_state = min(model.max_capital + 1, (state - 1) + bet + 1)
+        lose_state = max(1, (state - 1) - bet + 1)
 
         # reward 1.0 if an donly if we achieve the target capital
         win_reward = win_state == absorbing ? 1.0 : 0.0
