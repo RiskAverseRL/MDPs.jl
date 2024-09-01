@@ -4,11 +4,10 @@ using SparseArrays
 
 """ 
 An abstract tabular Markov Decision Process which is specified by a transition function. 
-
 Functions that should be defined for any subtype for value and policy iterations
 to work are: `state_count`, `states`, `action_count`, `actions`, and `transition`.
 
-Generally, states should be 1-based.
+Generally, states and actions are 1-based.
 
 The methods `state_count` and `states` should only include non-terminal states
 """
@@ -18,7 +17,6 @@ abstract type TabMDP <: MDP{Int,Int} end
 # General MDP interface functions
 # ----------------------------------------------------------------
 
-isterminal(::TabMDP, s::Int) = s ≤ 0
 valuefunction(::TabMDP, s::Int, v) = v[s]
 
 function state_count end

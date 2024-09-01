@@ -18,18 +18,12 @@ abstract type MDP{S,A} end
 # Default definition of functions
 # ----------------------------------------------------------------
 
-"""
-    isterminal(mdp, state)
-
-Return true if the state is terminal
-"""
-function isterminal end
 
 """
     (sn, p, r) ∈ transition(model, s, a)
 
-Return a list with next states, probabilities, and rewards.
-Returns an iterator. 
+Return an iterator with next states, probabilities, and rewards for
+`model` taking an action `a` in state `s`.
 
 Use `getnext` instead, which is more efficient and convenient to use. 
 """
@@ -38,7 +32,7 @@ function transition end
 """
     valuefunction(mdp, state, valuefunction)
 
-Evaluates the value function for an MDP in a state
+Evaluates the value function for an `mdp` in a `state`
 """
 function valuefunction end
 

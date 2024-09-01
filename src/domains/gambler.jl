@@ -76,7 +76,7 @@ in which `1` is received forever.
 
 Available actions are `1`, ..., `state`.
 
-Special states: `state=1` is broke and `state=max_capital+1` is an abosrbing state.
+Special states: `state=1` is broke and `state=max_capital+1` is an absorbing state.
 
 The reward is `-1` when the gambler goes broke and `+1` when it achieves the target capital.
 """

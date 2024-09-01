@@ -16,16 +16,11 @@ function mrp!(P_π::AbstractMatrix{<:Real}, r_π::AbstractVector{<:Real},
     S = state_count(model)
     fill!(P_π, 0.); fill!(r_π, 0.)
     for s ∈ 1:S
-        #TODO: remove the definition of terminal states
-        if !isterminal(model, s)
-            for (sn, p, r) ∈ transition(model, s, π[s])
-                P_π[s,sn] ≈ 0. ||
-                    error("duplicated transition entries (s1->s2, s1->s2) not allowed")
-                P_π[s,sn] += p
-                r_π[s] += p * r
-            end
-        else
-            r_π[s] = reward_T(model, s)
+        for (sn, p, r) ∈ transition(model, s, π[s])
+            P_π[s,sn] ≈ 0. ||
+                error("duplicated transition entries (s1->s2, s1->s2) not allowed")
+            P_π[s,sn] += p
+            r_π[s] += p * r
         end
     end
 end
