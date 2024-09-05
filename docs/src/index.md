@@ -56,6 +56,12 @@ Pages = ["mrp.jl"]
 Modules = [MDPs]
 Pages = ["policyiteration.jl"]
 ```
+
+```@autodocs
+Modules = [MDPs]
+Pages = ["transient.jl"]
+```
+
 ## Value Function Manipulation
 
 ```@autodocs
@@ -94,4 +100,8 @@ Modules = [MDPs.Domains.Inventory]
 
 ```@autodocs
 Modules = [MDPs.Domains.Machine]
+```
+
+```@autodocs
+Modules = [MDPs.Domains.GridWorld]
 ```

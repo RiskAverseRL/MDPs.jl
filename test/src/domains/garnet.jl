@@ -12,7 +12,7 @@ import HiGHS, JuMP
     v2 = value_iteration(g1, InfiniteH(0.95); ϵ=1e-10)
     v3 = value_iteration(g2, InfiniteH(0.95); ϵ=1e-10)
     v4 = policy_iteration(g2, 0.95)
-    v5 = lp_solve(g, .95, JuMP.Model(HiGHS.Optimizer))
+    v5 = lp_solve(g, .95, HiGHS.Optimizer)
 
     # Ensure value functions are close
     V = hcat(v1.value, v2.value, v3.value, v4.value, v5.value)

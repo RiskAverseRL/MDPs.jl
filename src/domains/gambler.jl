@@ -8,9 +8,9 @@ mt(st, prob,rew) =
     (Int(st), Float64(prob), Float64(rew))::Tuple{Int, Float64, Float64}
 
 
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 # Discounted ruin
-# ----------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 
 
 """
@@ -58,9 +58,9 @@ function transition(model::Ruin, state::Int, action::Int)
 end
 
 
-# ----------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Transient ruin
-# ----------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 
 
 """
@@ -76,7 +76,9 @@ in which `1` is received forever.
 If `noop = true` then the available actions are `1, ..., capital+1` and bet = `action - 1`. This
 allows a bet of 0 which is not a transient policy. 
 
-If `noop = false` then the available actions are `1, ..., capital` and bet = `action `.
+If `noop = false` then the available actions are `1, ..., capital` and bet = `action `. The MDP is not
+transient if `noop = true`, but has some transient policies. When `noop = false`, the MDP is
+transient.
 
 Special states: `state=1` is broke and `state=max_capital+1` is maximal capital. Both of the
 states are absorbing/terminal.

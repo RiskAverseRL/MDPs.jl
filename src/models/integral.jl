@@ -129,6 +129,7 @@ state_count(model)
 # output
 20
 ```
+
 Load the model from an Arrow file (a binary tabular file format)
 ```jldoctest
 using MDPs, Arrow

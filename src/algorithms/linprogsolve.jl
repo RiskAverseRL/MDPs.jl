@@ -16,12 +16,19 @@ The function needs to be provided with a solver. See the example below.
 
 # Example
 
+```jldoctest
     using MDPs, HiGHS
     model = Domains.Gambler.Ruin(0.5, 10)
-    lp_solve(model, 0.9, HiGHS.Optimizer)
+    val = lp_solve(model, 0.9, HiGHS.Optimizer)
+    maximum(val.policy)
+
+# output
+
+    6
+```
 """
 
-function lp_solve(model::TabMDP, obj::InfiniteH, lpm::JuMP.Model; silent = true)
+function lp_solve(model::TabMDP, obj::InfiniteH, lpmf; silent = true)
     γ = discount(obj)
     0 ≤ γ < 1 || error("γ must be between 0 and 1.")
 

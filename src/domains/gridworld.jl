@@ -3,11 +3,9 @@ module GridWorld
 import ...TabMDP, ...transition, ...state_count, ...action_count
 import ...actions, ...states
 
-# TODO: Add docs, with method signatures
 """
 Models values of demand in `values` and probabilities in `probabilities`.
 """
-
 @enum Action begin
     UP = 1
     DOWN = 2
@@ -16,6 +14,9 @@ Models values of demand in `values` and probabilities in `probabilities`.
 end
 
 """
+    Parameters(reward_s, max_side_length, wind)
+
+
 Parameters that define a GridWorld problem
 
 - `rewards_s`: A vector of rewards for each state
@@ -58,7 +59,6 @@ function transition(model::Model, state::Int, action::Int)
     remaining_wind = model.params.wind / 3
     ret = []
     # Wrap the state around the grid 1-based indexing
-    # NOTE: Julia for the love of God please implement a proper modulo function
     upstate = state - n <= 0 ? state + n_states - n : state - n
     downstate = (state + n) > n_states ? state - n_states + n : state + n
     leftstate = state % n == 1 ? state + (n - 1) : state - 1

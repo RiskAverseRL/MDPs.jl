@@ -36,7 +36,7 @@ import HiGHS, JuMP
     v2 = value_iteration(model_g, InfiniteH(0.95); ϵ = 1e-10)
     v3 = value_iteration(model_gc, InfiniteH(0.95); ϵ = 1e-10)
     v4 = policy_iteration(model_gc, 0.95)
-    v5 = lp_solve(model, .95, JuMP.Model(HiGHS.Optimizer))
+    v5 = lp_solve(model, .95, HiGHS.Optimizer)
 
     @test all(state_count(model) .== state_count.((model_g, model_gc)))
     @test all(length(v1.value) .== length.((v2.value, v3.value, v4.value, v5.value)))
