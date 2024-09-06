@@ -14,10 +14,10 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 DataFrames = "1.6.1"
-DataFramesMeta = "0.14.1"
-Distributions = "0.25.107"
-StatsBase = "0.34.2"
-julia = "1.9"
+DataFramesMeta = "0.15"
+Distributions = "0.25"
+StatsBase = "0.34"
+julia = "1.10"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
