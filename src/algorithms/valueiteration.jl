@@ -1,5 +1,5 @@
 """
-    value_iteration(model, objective; [v_terminal, iterations = 1000, ϵ = 1e-3] ) 
+    value_iteration(model, objective[, π]; [v_terminal, iterations = 1000, ϵ = 1e-3] ) 
 
 
 Compute value function and policy for a tabular MDP `model` with an objective
@@ -19,6 +19,8 @@ The argument `v_terminal` represents the terminal value function. It should be p
 a function that maps the state id to its terminal value (at time T+1). If this value is provided,
 then it is used in place of 0.
 
+If a policy `π` is provided, then the algorithm evaluates it. 
+
 Infinite Horizon
 ----------------
 For a Bellman error `ϵ`, the computed value function is quaranteed to be within
@@ -32,6 +34,11 @@ is more efficient, but the goal of this function is also to compute the value
 function.
 
 The time steps go from 1 to T+1.
+
+
+## See also
+
+`value_iteration!`
 """
 function value_iteration end
 
@@ -68,6 +75,30 @@ function value_iteration!(v::Vector{Vector{Float64}}, π::Vector{Vector{Int}},
     end
     return (policy = π, value = v)
 end
+
+
+function value_iteration(model::TabMDP, objective::Markov, π::Vector{Vector{Int}};
+                         v_terminal = nothing)
+    length(π) == horizon(objective) ||
+        
+        error("Policy π length must match the horizon $(horizon(model))")
+    vp = make_value(model, objective)
+    v = vp.value
+    
+    n = state_count(model)
+    # final value function
+    v[horizon(objective)+1] .= isnothing(v_terminal) ? 0 : map(v_terminal, 1:n)
+    
+    for t ∈ horizon(objective):-1:1
+        # initialize vectors
+        Threads.@threads for s ∈ 1:n
+            length(π[t]) == n || error("Policy π[$t] length must match state count $n")
+            v[t][s] = qvalue(model, objective, t, s, π[t][s], v[t+1]) 
+        end
+    end
+    return (policy = π, value = v)
+end
+
 
 function value_iteration(model::TabMDP, objective::Stationary;
                          iterations::Integer = 10000, ϵ::Number = 1e-3)
