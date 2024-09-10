@@ -26,6 +26,8 @@ Objective that is solved by a randomized stationary policy
 abstract type StationaryDet <: Stationary end
 
 """
+    InfiniteH(γ)
+
 Inifinite-horizon discounted objective. The discount factor `γ` can
 be in [0,1]. The optimal policy is stationary.
 """
@@ -39,8 +41,11 @@ struct InfiniteH <: StationaryDet
 end
 
 """
+    FiniteH(γ, T)
+
 Finite-horizon discounted model. The discount factor `γ` can
-be in [0,1]. The optimal policy is Markov but time dependent.
+be in [0,1] and the horizon `T` must be a positive integer.
+The optimal policy is Markov but time dependent.
 """
 struct FiniteH <: MarkovDet
     γ::Float64
@@ -55,6 +60,8 @@ end
 
 
 """
+    TotalReward()
+
 Total reward criterion. The objective is to maximize the sum
 of the undiscounted rewards. 
 
