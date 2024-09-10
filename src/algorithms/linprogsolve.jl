@@ -6,7 +6,7 @@ using JuMP
 
 
 """
-lp_solve(model, γ, lpm)
+    lp_solve(model, γ, lpm)
 
 Implements the linear program primal problem for an MDP `model` with a discount factor `γ`.
 It uses the JuMP model `lpm` as the linear program solver and returns the state values
