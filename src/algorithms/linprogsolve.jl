@@ -8,6 +8,7 @@ using JuMP
 """
     lp_solve(model, γ, lpmf, [silent = true])
 
+
 Implements the linear program primal problem for an MDP `model` with a discount factor `γ`.
 It uses the JuMP model `lpm` as the linear program solver and returns the state values
 found by `lpmf`. The `lpmf` is a factory that can be passed to `JuMP.Model`. 
@@ -48,6 +49,7 @@ function lp_solve(model::TabMDP, obj::InfiniteH, lpmf; silent = true)
     end
     
     optimize!(lpm)
+
     is_solved_and_feasible(lpm; dual = true) ||
         error("Failed to solve the MDP linear program")
     
@@ -58,4 +60,5 @@ end
 lp_solve(model::TabMDP, γ::Number, lpm; args...) =
     lp_solve(model, InfiniteH(γ), lpm; args...)
     
+
 
