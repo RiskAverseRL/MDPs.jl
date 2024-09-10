@@ -172,7 +172,6 @@ function simulate(model::MDP{S,A}, π::Policy{S,A}, initial,
             prob = rand()            
             tot_prob = 0.
             for (sn,pn,rn) ∈ transition(model, states[t-1,run], actions[t-1,run])
-                isterminal(model, sn) && error("Terminal states unsupported.")    
                 if prob ≤ (tot_prob += pn) # state sn was sampled
                     # update internal state using the current time step
                     let tr = Transition(states[t-1,run], actions[t-1,run], rn, sn, t)

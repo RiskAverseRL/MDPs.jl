@@ -129,6 +129,7 @@ state_count(model)
 # output
 20
 ```
+
 Load the model from an Arrow file (a binary tabular file format)
 ```jldoctest
 using MDPs, Arrow
@@ -239,41 +240,30 @@ values.
 The option `docompress` combined transitions to the same state into a single transition.
 This improves efficiency in risk-neutral settings, but may change the outcome
 in risk-averse settings.
-
-The function adds one more state at the end which represents a catch-all terminal state
 """
 function make_int_mdp(mdp::TabMDP; docompress = false)
     statecount = state_count(mdp)
-    states = Vector{IntState}(undef, statecount + 1) # + terminal
+    states = Vector{IntState}(undef, statecount) 
    
-    # add a self-looping state to model a terminal state
-    # needed to handle terminal state
-    states[statecount+1] = IntState([IntAction([statecount+1],[1.0],[0.0])])
-                          
     Threads.@threads for s ∈ 1:statecount
         action_vals = 1:action_count(mdp, s)
-        if isterminal(mdp, s)
-            states[s]  = IntState([IntAction(
-                [statecount+1], [1.0], [0.])])
-        else
-            acts = Vector{IntAction}(undef, length(action_vals))
-            for (ia,a) ∈ enumerate(action_vals)
-                ns = Array{Int}(undef, 0)     # next state
-                np = Array{Float64}(undef, 0) # next probalbility
-                nr = Array{Float64}(undef, 0) # next reward
+        acts = Vector{IntAction}(undef, length(action_vals))
+        for (ia,a) ∈ enumerate(action_vals)
+            ns = Array{Int}(undef, 0)     # next state
+            np = Array{Float64}(undef, 0) # next probalbility
+            nr = Array{Float64}(undef, 0) # next reward
 
-                for (nexts, nextp, nextr) ∈ transition(mdp, s, a)
-                    # check where to insert the next state transition
-                    i = searchsortedfirst(ns, nexts)
-                    insert!(ns, i, nexts)
-                    insert!(np, i, nextp)
-                    insert!(nr, i, nextr)
-                end
-                a = IntAction(ns, np, nr)
-                acts[ia] = docompress ? compress(a) : a
+            for (nexts, nextp, nextr) ∈ transition(mdp, s, a)
+                # check where to insert the next state transition
+                i = searchsortedfirst(ns, nexts)
+                insert!(ns, i, nexts)
+                insert!(np, i, nextp)
+                insert!(nr, i, nextr)
             end
-            states[s] = IntState(acts)
+            a = IntAction(ns, np, nr)
+            acts[ia] = docompress ? compress(a) : a
         end
+        states[s] = IntState(acts)
     end
     IntMDP(states)
 end

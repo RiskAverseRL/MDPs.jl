@@ -53,6 +53,17 @@ struct FiniteH <: MarkovDet
     end
 end
 
+
+"""
+Total reward criterion. The objective is to maximize the sum
+of the undiscounted rewards. 
+
+This objective can generally only be applied to transient states,
+which have a terminal state; see `isterminal` for more details.
+"""
+struct TotalReward <: StationaryDet
+end
+
 """
     horizon(objective)
 

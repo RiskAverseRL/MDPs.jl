@@ -39,14 +39,9 @@ See `qvalues` for more information.
 function qvalues!(qvalues::AbstractVector{<:Real}, model::MDP{S,A},
                   obj::Objective, t::Integer, s::S, v) where {S,A}
 
-    if isterminal(model, s)
-        qvalues .= -Inf
-        qvalues[1] = 0 
-    else
-        acts = actions(model, s)
-        for (ia,a) ∈ enumerate(acts)
-            qvalues[ia] = qvalue(model, obj, t, s, a, v)
-        end
+    acts = actions(model, s)
+    for (ia,a) ∈ enumerate(acts)
+        qvalues[ia] = qvalue(model, obj, t, s, a, v)
     end
 end
 
@@ -100,15 +95,10 @@ time-dependent updates.
 The function uses `qvalue` to compute the Bellman operator and the greedy policy.
 """
 function bellmangreedy(model::MDP{S,A}, obj::Objective, t::Integer, s::S, v) where {S,A}
-    if isterminal(model, s)
-        (qvalue = 0 :: Float64,
-         action = emptyaction(model) :: A) 
-    else
-        acts = actions(model, s)
-        (qval, ia) = findmax(a->qvalue(model, obj, t, s, a, v), acts) 
-        (qvalue = qval :: Float64,
-         action = acts[ia] :: A)
-    end
+    acts = actions(model, s)
+    (qval, ia) = findmax(a->qvalue(model, obj, t, s, a, v), acts) 
+    (qvalue = qval :: Float64,
+        action = acts[ia] :: A)
 end
 
 # default fallback when t is 
