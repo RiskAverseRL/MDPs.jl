@@ -64,7 +64,7 @@ end
 
 
 """
-    RuinTransient(win, max_capital)
+    RuinTransient(win, max_capital, noop)
 
 Gambler's ruin; the transient version. Can decide how much to bet at any point in time. With some
 probability `win`, the bet is doubled, and with `1-win` it is lost. The reward is `1` if it achieves
