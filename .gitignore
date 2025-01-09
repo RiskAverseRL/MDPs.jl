@@ -1,0 +1,4 @@
+docs/build
+Manifest.toml
+docs/output_gambler.csv
+test/Manifest.toml

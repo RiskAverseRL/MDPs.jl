@@ -102,8 +102,8 @@ found found using the solver constructed by `JuMP.Model(lpmf)`.
 
 5-element Vector{Int64}:
  1
- 4
  2
+ 3
  2
  1
 ```
