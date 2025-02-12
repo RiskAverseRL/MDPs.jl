@@ -22,19 +22,21 @@ Parameters that define a GridWorld problem
 - `rewards_s`: A vector of rewards for each state
 - `max_side_length`: An integer that represents the maximum side length of the grid
 - `wind`: A float that represents the wind
+- 'revolve': Whether or not the agennt can wrap around the grid by moving off the edge and appearing on the other side *default True*
 """
 struct Parameters
     rewards_s::Vector{Float64}
     max_side_length::Int
     wind::Float64
+    revolve::Bool
 
-    function Parameters(rewards_s, max_side_length, wind)
+    function Parameters(rewards_s::AbstractVector{<:Real}, max_side_length::Int, wind::Real, revolve::Bool=true)
         length(rewards_s) == max_side_length * max_side_length ||
             error("Rewards must have the same length as the number of states.")
         wind ≥ 0.0 || error("Wind must be non-negative.")
         wind ≤ 1.0 || error("Wind must be less than or equal to 1.")
 
-        new(rewards_s, max_side_length, wind)
+        new(rewards_s, max_side_length, float(wind), revolve)
     end
 end
 
@@ -59,10 +61,17 @@ function transition(model::Model, state::Int, action::Int)
     remaining_wind = model.params.wind / 3
     ret = []
     # Wrap the state around the grid 1-based indexing
-    upstate = state - n <= 0 ? state + n_states - n : state - n
-    downstate = (state + n) > n_states ? state - n_states + n : state + n
-    leftstate = state % n == 1 ? state + (n - 1) : state - 1
-    rightstate = state % n == 0 ? state - (n - 1) : state + 1
+    upstate = state - n <= 0 ? state : state - n
+    downstate = (state + n) > n_states ? state : state + n
+    leftstate = state % n == 1 ? state : state - 1
+    rightstate = state % n == 0 ? state : state + 1
+    if model.params.revolve
+        # wrap the state around the grid 1-based indexing
+        upstate = state - n <= 0 ? state + n_states - n : state - n
+        downstate = (state + n) > n_states ? state - n_states + n : state + n
+        leftstate = state % n == 1 ? state + (n - 1) : state - 1
+        rightstate = state % n == 0 ? state - (n - 1) : state + 1
+    end
     if action == Int(UP)
         push!(ret, (upstate, compl_wind, model.params.rewards_s[upstate]))
         push!(ret, (downstate, remaining_wind, model.params.rewards_s[downstate]))
