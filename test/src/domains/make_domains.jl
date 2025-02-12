@@ -3,16 +3,16 @@ using MDPs.Domains
 using CSV
 
 
-struct Problem{M <: TabMDP}
-    γ :: Float64
-    horizon :: Int
-    initstate :: Int
-    model :: M
+struct Problem{M<:TabMDP}
+    γ::Float64
+    horizon::Int
+    initstate::Int
+    model::M
 end
 
 # creates a set of benchmark problems
 function make_domains()
-    problems = Dict{String, Problem}()
+    problems = Dict{String,Problem}()
     # inventory
     begin
         # risk parameters
@@ -20,18 +20,18 @@ function make_domains()
         initstate = 1         # initial state
         horizon = 100
         # Define the inventory model
-        demand = Inventory.Demand([0,2,3,4,5,30,3,2],
-                                  [0.1,0.3,0.1,0.1,0.1,0.1,0.0,0.2])
-        costs = Inventory.Costs(5.,2.,0.3,0.5)
+        demand = Inventory.Demand([0, 2, 3, 4, 5, 30, 3, 2],
+            [0.1, 0.3, 0.1, 0.1, 0.1, 0.1, 0.0, 0.2])
+        costs = Inventory.Costs(5.0, 2.0, 0.3, 0.5)
         limits = Inventory.Limits(100, 0, 50)
-        params = Inventory.Parameters(demand, costs, 16., limits)
+        params = Inventory.Parameters(demand, costs, 16.0, limits)
         model = Inventory.Model(params)
         problems["inventory"] = Problem(γ, horizon, initstate, model)
     end
     #invetory_generic
     begin
         γ = 0.9
-        filein  = joinpath(dirname(pathof(MDPs)), "..", "data", "inventory.arr")
+        filein = joinpath(dirname(pathof(MDPs)), "..", "data", "inventory.arr")
         model = load_mdp(Arrow.Table(filein))
         initstate = 1         # initial state
         horizon = 100
@@ -52,11 +52,11 @@ function make_domains()
         initstate = 8  # capital: state - 1
         model = Domains.Gambler.Ruin(0.7, 10)
         problems["ruin"] = Problem(γ, horizon, initstate, model)
-   end
+    end
     # riverswim
     begin
         filein = joinpath(dirname(pathof(MDPs)), "..", "data", "riverswim.csv")
-        model = load_mdp(CSV.File(filein); idoutcome = 1)
+        model = load_mdp(CSV.File(filein); idoutcome=1)
         γ = 0.98
         horizon = 100
         initstate = 1         # initial state
@@ -64,7 +64,7 @@ function make_domains()
     end
     # population
     begin
-        filein  = joinpath(dirname(pathof(MDPs)), "..", "data", "population.arr")
+        filein = joinpath(dirname(pathof(MDPs)), "..", "data", "population.arr")
         model = load_mdp(Arrow.Table(filein))
         α = 0.9           # var, cvar, evar
         β = 0.5           # erm
@@ -81,7 +81,15 @@ function make_domains()
         γ = 0.95
         problems["onestatepm"] = Problem(γ, horizon, initstate, model)
     end
+    # twostates
+    begin
+        model = Domains.Simple.TwoStates([1, 0], 0.4)
+        initstate = 1         # initial state
+        horizon = 100
+        γ = 0.95
+        problems["onestatepm"] = Problem(γ, horizon, initstate, model)
+    end
     problems
-end    
+end
 
 #make_domains()
