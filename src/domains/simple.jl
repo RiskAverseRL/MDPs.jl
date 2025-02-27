@@ -42,12 +42,13 @@ action_count(model::OneStatePlusMinus, s::Int) = 1
 # ----------------------------------------------------------------
 struct TwoStates <: TabMDP
     rewards::Vector{Float64}
-    epsilon::Float64
+    epsilon::Float64 # probability of transitioning to the other state
+    transient::Bool
 
-    function TwoStates(rewards, epsilon=0.4)
+    function TwoStates(rewards, epsilon=0.4; transient=false)
         @assert length(rewards) == 2
         @assert 0 <= epsilon <= 1 "epsilon must be in [0, 1]"
-        new(rewards, epsilon)
+        new(rewards, epsilon, transient)
     end
 end
 
@@ -58,9 +59,12 @@ function transition(model::TwoStates, state::Int, action::Int)
     if state == 1
         ((1::Int, 1.0 - model.epsilon::Float64, model.rewards[1]::Float64), (2::Int, model.epsilon::Float64, model.rewards[1]::Float64))
     else
-        ((1::Int, model.epsilon::Float64, model.rewards[2]::Float64), (2::Int, 1.0 - model.epsilon::Float64, model.rewards[2]::Float64))
+        if model.transient
+            ((2::Int, 1.0::Float64, 0.0::Float64),)
+        else
+            ((1::Int, model.epsilon::Float64, model.rewards[2]::Float64), (2::Int, 1.0 - model.epsilon::Float64, model.rewards[2]::Float64))
+        end
     end
-
 end
 
 state_count(model::TwoStates) = 2
