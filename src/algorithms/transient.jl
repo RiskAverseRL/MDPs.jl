@@ -12,7 +12,7 @@ Checks that the `state` is terminal in `model`. A state is terminal if it
 
 1) has a single action,
 2) transitions to itself,
-3) has a reward 0. 
+3) has a reward 0.
 
 
 # Example
@@ -44,37 +44,37 @@ end
 # reward: a function that specifies whether the reward
 # from the MDP is used or a custom reward
 # the function treats terminal states as having value 0
-function _transient_lp(model::TabMDP, reward::Union{Float64, Nothing},
-                       lpmf; silent) :: Union{Nothing,NamedTuple}
+function _transient_lp(model::TabMDP, reward::Union{Float64,Nothing},
+    lpmf; silent)::Union{Nothing,NamedTuple}
 
     @assert minimum(states(model)) == 1 # make sure that the index is 1-based
 
     lpm = Model(lpmf)
     silent && set_silent(lpm)
 
-    rew(r) = isnothing(reward) ? r :: Float64 : reward :: Float64
-    
+    rew(r) = isnothing(reward) ? r::Float64 : reward::Float64
+
     n = state_count(model)
-    
+
     @variable(lpm, v[1:n])
     @objective(lpm, Min, sum(v))
 
     u = Vector{Vector{ConstraintRef}}(undef, n)
     for s ∈ 1:n
-        @assert minimum(actions(model,s)) == 1 # make sure that the index is 1-based
+        @assert minimum(actions(model, s)) == 1 # make sure that the index is 1-based
         if isterminal(model, s) # set terminal state(s) to 0 value
             u[s] = [@constraint(lpm, v[s] == 0)]
         else
-            u[s] = [@constraint(lpm, v[s] ≥ sum(p*(rew(r) + v[sn])
-                                                for (sn,p,r) ∈ transition(model,s,a)))
-                    for a in actions(model,s)]
+            u[s] = [@constraint(lpm, v[s] ≥ sum(p * (rew(r) + v[sn])
+                                                for (sn, p, r) ∈ transition(model, s, a)))
+                    for a in actions(model, s)]
         end
     end
-    
+
     optimize!(lpm)
 
-    if is_solved_and_feasible(lpm) 
-        (value = value.(v), policy = map(x -> argmax(dual.(x)), u))
+    if is_solved_and_feasible(lpm)
+        (value=value.(v), policy=map(x -> argmax(dual.(x)), u))
     else
         nothing
     end
@@ -108,9 +108,9 @@ found found using the solver constructed by `JuMP.Model(lpmf)`.
  1
 ```
 """
-function lp_solve(model::TabMDP, obj::TotalReward, lpmf; silent = true)
+function lp_solve(model::TabMDP, obj::TotalReward, lpmf; silent=true)
     # nothing => run with the true rewards
-    solution = _transient_lp(model, nothing, lpmf; silent = silent)
+    solution = _transient_lp(model, nothing, lpmf; silent=silent)
     if isnothing(solution)
         error("Failed to solve LP formulation. Is MDP transient?")
     else
@@ -129,13 +129,13 @@ Note that the function returns true even when there are some policies that are n
 
 The parameters match the use in `lp_solve`.
 """
-function anytransient(model::TabMDP, lpmf; silent = true)
-    solution = _transient_lp(model, -1., lpmf; silent = silent)
+function anytransient(model::TabMDP, lpmf; silent=true)
+    solution = _transient_lp(model, -1.0, lpmf; silent=silent)
     !isnothing(solution)
 end
 
 """
-    anytransient(model, lpmf, [silent = true])
+    alltransient(model, lpmf, [silent = true])
 
 Checks if the MDP `model` has all transient policies. A policy is transient if it
 is guaranteed to terminate with positive probability after some finite number of steps.
@@ -144,7 +144,7 @@ Note that the function returns true only if all policies are transient.
 
 The parameters match the use in `lp_solve`.
 """
-function alltransient(model::TabMDP, lpmf; silent = true)
-    solution = _transient_lp(model, 1., lpmf; silent = silent)
+function alltransient(model::TabMDP, lpmf; silent=true)
+    solution = _transient_lp(model, 1.0, lpmf; silent=silent)
     !isnothing(solution)
 end

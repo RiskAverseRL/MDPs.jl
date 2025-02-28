@@ -38,7 +38,7 @@ struct Parameters
         wind ≥ 0.0 || error("Wind must be non-negative.")
         wind ≤ 1.0 || error("Wind must be less than or equal to 1.")
         if transient
-            revolve && error("Cannot have a transient model that also revolves.")
+            revolve && error("Cannot have a transient model that also revolves. Set kwarg revolve=false.")
             rewards_s = vcat(rewards_s, [0.0]) # Absorbing state reward is 0
         end
         new(rewards_s, max_side_length, float(wind), revolve, transient)

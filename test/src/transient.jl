@@ -10,6 +10,9 @@ using HiGHS
     val = lp_solve(model, TotalReward(), opt)
     # @test val.value[2] ≈ 0.5
     # @test val.policy[2] = 14
+    model = Domains.Simple.TwoStates([-0.2, 0.0], 0.1, transient=true)
+    @test anytransient(model, opt)
+    @test alltransient(model, opt) # should be transient
 end
 
 
@@ -23,5 +26,3 @@ end
     # @test val.value[2] ≈ 0.5
     # @test val.policy[2] = 20
 end
-
-# TODO add xihongs two state transient test
