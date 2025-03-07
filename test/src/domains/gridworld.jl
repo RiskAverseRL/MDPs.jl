@@ -79,4 +79,8 @@ using MDPs.Domains
 
     P = hcat(p1, p2, p3, p4)
     @test all(mapslices(allequal, P; dims=2))
+    sink_state = 10
+    @test length(actions(model, sink_state)) == 1
+    @test length(transition(model, sink_state, 1)) == 1
+    @test isterminal(model, sink_state)
 end

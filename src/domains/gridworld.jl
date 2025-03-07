@@ -68,7 +68,7 @@ function transition(model::Model, state::Int, action::Int)
     end
     compl_wind = (1.0 - model.params.wind)
     remaining_wind = model.params.wind / 3
-    # Wrap the state around the grid 1-based indexing
+    # Default you stay in the same state
     upstate = state - n <= 0 ? state : state - n
     downstate = (state + n) > n_states ? state : state + n
     leftstate = state % n == 1 ? state : state - 1
@@ -114,10 +114,10 @@ function transition(model::Model, state::Int, action::Int)
 end
 
 state_count(params::Parameters) = params.transient ? (params.max_side_length * params.max_side_length) + 1 : params.max_side_length * params.max_side_length
-action_count(params::Parameters, state::Int) = 4
+action_count(params::Parameters, state::Int) = state == state_count(params) ? 1 : 4 # Absorbing state has a single action
 
 state_count(model::Model) = state_count(model.params)
-action_count(model::Model, state::Int) = 4
+action_count(model::Model, state::Int) = action_count(model.params, state)
 
 states(model::Model) = 1:state_count(model.params)
 actions(model::Model, state::Int) = 1:action_count(model.params, state)
