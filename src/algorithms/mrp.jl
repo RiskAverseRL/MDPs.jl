@@ -39,6 +39,21 @@ function mrp(model::TabMDP, π::AbstractVector{<:Integer})
     (P_π, r_π)    
 end
 
+# Same as function above, except it doesn't updata a reward vector
+
+function mp!(P_π::AbstractMatrix{<:Real},
+    model::TabMDP, π::AbstractVector{<:Integer})
+S = state_count(model)
+fill!(P_π, 0.)
+for s ∈ 1:S
+for (sn, p, r) ∈ transition(model, s, π[s])
+  P_π[s,sn] ≈ 0. ||
+      error("duplicated transition entries (s1->s2, s1->s2) not allowed")
+  P_π[s,sn] += p
+end
+end
+end
+
 """
     mrp(model, π)
 

@@ -122,3 +122,48 @@ function value_iteration(model::TabMDP, objective::Stationary;
             iterations = itercount,
             residual = residual)
 end
+
+
+#=
+A modification of value iteration which considers the value function updates to be step directions of a gradient descent algorithm with the objective being the L_2 norm squared of the optimal bellman residual.
+=#
+
+function modified_value_iteration(model::TabMDP, objective::Stationary;
+    iterations::Integer = 10000, ϵ::Number = 1e-3)
+nstates = state_count(model)
+vold = zeros(nstates)  # prior iteration
+vnew = zeros(nstates)  # current iteration
+diff = zeros(nstates)  # difference in values between iterations
+residual = 0.         # the bellman residual
+itercount = iterations
+
+# Current policy for stepsize computation
+policy = fill(-1,nstates)
+
+# Policy expected transitions and rewards for stepsize computation
+IP_π = zeros(nstates, nstates)
+r_π = zeros(nstates)
+
+for it ∈ 1:iterations
+    Threads.@threads for s ∈ 1:nstates
+        @inbounds vnew[s] = bellman(model, objective, s, vold)
+    end
+    # update policy related items
+    greedy!(policy, model, InfiniteH(γ), v_π)
+    mp!(IP_π, model, policy)
+    lmul!(-γ, IP_π)
+    _add_identity!(IP_π)
+
+    # compute the bellman residual
+    diff .= vnew .- vold
+    residual = sum(diff.^2)
+
+    # compute the stepsize and update
+    α = diff'*IP_π*diff/(2*diff'*IP_π'*IP_π*diff)
+    vold .= α*vnew + (1-α)*vold
+    residual ≤ ϵ && (itercount = it; break)
+end
+return (value = vnew,
+iterations = itercount,
+residual = residual)
+end
