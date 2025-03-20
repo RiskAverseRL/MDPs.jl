@@ -123,7 +123,7 @@ function transition(model::RuinTransient, state::Int, action::Int)
     1 ≤ action ≤ action_count(model, state) || error("invalid action $action in state $state")
 
     if state == 1  # broke
-        (mt(state, 1.0, 0.0),)
+        (mt(absorbing, 1.0, model.lose_reward),)
     elseif state == model.max_capital+1   # absorbing terminal state; no reward
         (mt(state, 1.0, 0.0),)
     else

@@ -17,8 +17,7 @@ function mrp!(P_π::AbstractMatrix{<:Real}, r_π::AbstractVector{<:Real},
     fill!(P_π, 0.); fill!(r_π, 0.)
     for s ∈ 1:S
         for (sn, p, r) ∈ transition(model, s, π[s])
-            P_π[s,sn] ≈ 0. ||
-                error("duplicated transition entries (s1->s2, s1->s2) not allowed")
+            # P_π[s,sn] ≈ 0. || error("duplicated transition entries (s1->s2, s1->s2) not allowed")
             P_π[s,sn] += p
             r_π[s] += p * r
         end

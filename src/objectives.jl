@@ -71,6 +71,16 @@ which have a terminal state; see `isterminal` for more details.
 struct TotalReward <: StationaryDet
 end
 
+
+"""
+    AverageReward()
+
+The average reward infinite hotizon criterion. The objective
+is to maximize the expected average reward over an infinite horizon.
+"""
+struct AverageReward <: StationaryDet
+
+
 """
     horizon(objective)
 
