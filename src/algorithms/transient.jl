@@ -12,7 +12,7 @@ Checks that the `state` is terminal in `model`. A state is terminal if it
 
 1) has a single action,
 2) transitions to itself,
-3) has a reward 0. 
+3) has a reward 0.
 
 
 # Example
@@ -20,13 +20,16 @@ Checks that the `state` is terminal in `model`. A state is terminal if it
 ```jldoctest
     using MDPs
     model = Domains.Gambler.RuinTransient(0.5, 4, true)
-    isterminal.((model,), states(model))[1:2]
+    isterminal.((model,), states(model))
 
 # output
 
-2-element BitVector:
- 1
+5-element BitVector:
  0
+ 0
+ 0
+ 0
+ 1
 ```
 """
 function isterminal(model::MDP{S,A}, state::S) where {S,A}
@@ -53,9 +56,9 @@ function _transient_lp(model::TabMDP, reward::Union{Float64, Nothing},
     silent && set_silent(lpm)
 
     rew(r) = isnothing(reward) ? r :: Float64 : reward :: Float64
-    
+
     n = state_count(model)
-    
+
     @variable(lpm, v[1:n])
     @objective(lpm, Min, sum(v))
 
@@ -70,10 +73,10 @@ function _transient_lp(model::TabMDP, reward::Union{Float64, Nothing},
                     for a in actions(model,s)]
         end
     end
-    
+
     optimize!(lpm)
 
-    if is_solved_and_feasible(lpm) 
+    if is_solved_and_feasible(lpm)
         (value = value.(v), policy = map(x -> argmax(dual.(x)), u))
     else
         nothing
