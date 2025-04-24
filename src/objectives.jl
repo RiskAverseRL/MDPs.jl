@@ -51,7 +51,7 @@ struct FiniteH <: MarkovDet
     γ::Float64
     T::Int
 
-    function FiniteH(γ::Number, T::Integer) 
+    function FiniteH(γ::Number, T::Integer)
         one(γ) ≥ γ ≥ zero(γ) || error("Discount γ must be in [0,1]")
         T ≥ one(T) || error("Horizon must be at least one")
         new(γ, T)
@@ -63,7 +63,7 @@ end
     TotalReward()
 
 Total reward criterion. The objective is to maximize the sum
-of the undiscounted rewards. 
+of the undiscounted rewards.
 
 This objective can generally only be applied to transient states,
 which have a terminal state; see `isterminal` for more details.
@@ -79,6 +79,7 @@ The average reward infinite hotizon criterion. The objective
 is to maximize the expected average reward over an infinite horizon.
 """
 struct AverageReward <: StationaryDet
+end
 
 
 """
