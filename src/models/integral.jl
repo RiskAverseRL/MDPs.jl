@@ -7,7 +7,7 @@ using DataFramesMeta
 An incorrect parameter value
 """
 struct FormatError <: Exception
-    msg :: AbstractString
+    msg::AbstractString
 end
 
 # helper method to check if the arrays have the same length
@@ -17,32 +17,32 @@ _same_lengths(x...) = (a = length.(x); all(a .== first(a)))
 # Action-related data definition
 # ----------------------------------------------------------------
 
-""" 
+"""
 Represents transitions that follow an action.
 The lengths `nextstate`, `probability`, and `reward` must be the same.
 
 Nextstate may not be unique and each transition can have a different reward
 associated with the transition. The transitions are not aggregated to allow for
 comuting the risk of a transition. Aggregating the values by state would change
-the risk value of the transition. 
+the risk value of the transition.
 """
 struct IntAction
     """ 1-based state index of the next state """
-    nextstate :: Vector{Int}
-    probability :: Vector{Float64}
-    reward :: Vector{Float64}
+    nextstate::Vector{Int}
+    probability::Vector{Float64}
+    reward::Vector{Float64}
 
-    function IntAction(nextstate, probability, reward) 
+    function IntAction(nextstate, probability, reward)
         # check that the provided values make sense
         (_same_lengths(nextstate, probability, reward)) ||
             error("Argument lengths must match.")
         isempty(nextstate) && error("States cannot be empty.")
         issorted(nextstate) || error("State ids must be sorted increasingly.")
         nextstate[1] ≥ 1 || error("State ids must be positive.") #sorted!
-        all(probability .≥ 0.) || error("Probabilities must be non-negative.")
+        all(probability .≥ 0.0) || error("Probabilities must be non-negative.")
         ps = sum(probability)
         ps ≈ 1.0 || error("Probabilities must sum to 1 instead of $ps")
-        
+
         new(nextstate, probability ./ ps, reward)
     end
 end
@@ -55,23 +55,23 @@ end
 # ----------------------------------------------------------------
 # State-related data definition
 # ----------------------------------------------------------------
-    
+
 """ Represents a discrete state """
 struct IntState
-    actions :: Vector{IntAction}
-    function IntState(actions :: Vector{IntAction})
+    actions::Vector{IntAction}
+    function IntState(actions::Vector{IntAction})
         isempty(actions) && throw(ArgumentError("Empty states not allowed"))
         new(actions)
     end
 end
 
-""" 
-MDP with integral states and stationary transitions 
+"""
+MDP with integral states and stationary transitions
 State and action indexes are all 1-based integers
 """
 struct IntMDP <: TabMDP
     """ States, actions, transitions """
-    states :: Vector{IntState}
+    states::Vector{IntState}
 end
 
 # ----------------------------------------------------------------
@@ -84,9 +84,9 @@ action_count(model::IntMDP, s::Int) = length(model.states[s].actions)
 actions(model::IntMDP, s::Int) = 1:length(model.states[s].actions)
 transition(model::IntMDP, s::Int, a::Int) =
     (x = model.states[s].actions[a]; zip(x.nextstate, x.probability, x.reward))
-function getnext(model::IntMDP, s::Int, a::Int) 
+function getnext(model::IntMDP, s::Int, a::Int)
     x = model.states[s].actions[a]
-    (states = x.nextstate, probabilities = x.probability, rewards = x.reward)
+    (states=x.nextstate, probabilities=x.probability, rewards=x.reward)
 end
 # ----------------------------------------------------------------
 # Loads CSV files
@@ -95,7 +95,7 @@ end
 """
     load_mdp(input, idoutcome)
 
-Load the MDP from `input`. The function **assumes 0-based indexes**
+    Load the MDP from `input`. The function **assumes 0-based indexes** (via `zerobased` flag),
 of states and actions, which is transformed to 1-based index.
 
 Input formats are anything that is supported by DataFrame. Some
@@ -142,27 +142,29 @@ state_count(model)
 21
 ```
 """
-function load_mdp(input; idoutcome = nothing, docompress = false)
+function load_mdp(input; idoutcome=nothing, docompress=false, zerobased=true)
     mdp = DataFrame(input)
     if (idoutcome != nothing)
         mdp = @subset(mdp, :idoutcome .== idoutcome - 1)
     end
 
     # offset relevant indices by one
-    mdp = @transform(mdp,
-              :idstatefrom = :idstatefrom .+ 1,
-              :idstateto   = :idstateto.+ 1,
-              :idaction    = :idaction .+ 1)
+    if zerobased
+        mdp = @transform(mdp,
+            :idstatefrom = :idstatefrom .+ 1,
+            :idstateto = :idstateto .+ 1,
+            :idaction = :idaction .+ 1)
+    end
     if docompress
         mdp = @chain mdp begin
             @transform(:rnew = :probability .* :reward)
             groupby([:idstatefrom, :idaction, :idstateto])
             @combine(:probability = sum(:probability),
-                 :reward = sum(:rnew)/sum(:probability))
+                :reward = sum(:rnew) / sum(:probability))
         end
     end
     mdp = @orderby(mdp, :idstatefrom, :idaction, :idstateto)
-    
+
     statecount = max(maximum(mdp.idstatefrom), maximum(mdp.idstateto))
     states = Vector{IntState}(undef, statecount)
     state_init = BitVector(false for s in 1:statecount)
@@ -170,12 +172,12 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
     for sd ∈ groupby(mdp, :idstatefrom)
         idstate = first(sd.idstatefrom)
         actions = Vector{IntAction}(undef, maximum(sd.idaction))
-       
+
         action_init = BitVector(false for a in 1:length(actions))
         for ad ∈ groupby(sd, :idaction)
             idaction = first(ad.idaction)
-            try 
-            actions[idaction] = IntAction(ad.idstateto, ad.probability, ad.reward)
+            try
+                actions[idaction] = IntAction(ad.idstateto, ad.probability, ad.reward)
             catch e
                 error("Error in state $(idstate-1), action $(idaction-1): $e")
             end
@@ -184,7 +186,7 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
         # report an error when there are missing indices
         all(action_init) ||
             throw(FormatError("Actions in state " * string(idstate - 1) *
-                " that were uninitialized " * string(findall(.!action_init) .- 1 ) ))
+                              " that were uninitialized " * string(findall(.!action_init) .- 1)))
 
         states[idstate] = IntState(actions)
         state_init[idstate] = true
@@ -193,15 +195,15 @@ function load_mdp(input; idoutcome = nothing, docompress = false)
     # create transitions to itself for each uninitialized state
     # to simulate a terminal state
     for s ∈ findall(.!state_init)
-        states[s] = IntState([IntAction([s], [1.], [0.])])
+        states[s] = IntState([IntAction([s], [1.0], [0.0])])
     end
     IntMDP(states)
 end
 
 
-_make_reward(r::Vector{<:Number}, s, n) = repeat([r[s]], n) 
-_make_reward(R::Matrix{<:Number}, s, n) = R[s,:]
-    
+_make_reward(r::Vector{<:Number}, s, n) = repeat([r[s]], n)
+_make_reward(R::Matrix{<:Number}, s, n) = R[s, :]
+
 
 """
     make_int_mdp(Ps, rs)
@@ -213,7 +215,7 @@ state-action-state rewwards. Each row of the transition matrix (and the reward
 matrix) represents the probabilities of transitioning to next states.
 """
 function make_int_mdp(Ps::AbstractVector{<:Matrix}, rs::AbstractVector{<:Array})
-    
+
     isempty(Ps) && error("Must have at least one action.")
     length(Ps) == length(rs) || error("Ps and rs lengths must match.")
 
@@ -222,8 +224,8 @@ function make_int_mdp(Ps::AbstractVector{<:Matrix}, rs::AbstractVector{<:Array})
     states = Vector{IntState}(undef, statecount)
     for s ∈ 1:statecount
         actions = [
-            IntAction(1:statecount, Ps[a][s,:], _make_reward(rs[a], s, statecount))
-            for a ∈ eachindex(Ps,rs)]
+            IntAction(1:statecount, Ps[a][s, :], _make_reward(rs[a], s, statecount))
+            for a ∈ eachindex(Ps, rs)]
         states[s] = IntState(actions)
     end
     IntMDP(states)
@@ -241,14 +243,14 @@ The option `docompress` combined transitions to the same state into a single tra
 This improves efficiency in risk-neutral settings, but may change the outcome
 in risk-averse settings.
 """
-function make_int_mdp(mdp::TabMDP; docompress = false)
+function make_int_mdp(mdp::TabMDP; docompress=false)
     statecount = state_count(mdp)
-    states = Vector{IntState}(undef, statecount) 
-   
+    states = Vector{IntState}(undef, statecount)
+
     Threads.@threads for s ∈ 1:statecount
         action_vals = 1:action_count(mdp, s)
         acts = Vector{IntAction}(undef, length(action_vals))
-        for (ia,a) ∈ enumerate(action_vals)
+        for (ia, a) ∈ enumerate(action_vals)
             ns = Array{Int}(undef, 0)     # next state
             np = Array{Float64}(undef, 0) # next probalbility
             nr = Array{Float64}(undef, 0) # next reward
@@ -269,23 +271,23 @@ function make_int_mdp(mdp::TabMDP; docompress = false)
 end
 
 """
-    compress(nextstate, probability, reward) 
+    compress(nextstate, probability, reward)
 
 The command will combine mulitple transitions to the same state into a single transition. Reward
 is computed as a weigted average of the individual rewards, assuming expected reward objective.
 """
-function compress(a::IntAction) 
+function compress(a::IntAction)
     nextstate = a.nextstate
     probability = a.probability
     reward = a.reward
 
     @assert issorted(nextstate)
-    
-    # arrays for the new action 
+
+    # arrays for the new action
     ns = empty(nextstate)
     np = empty(probability)
     nr = empty(reward)
-    
+
     for pos ∈ eachindex(nextstate, probability, reward)
         if !isempty(ns) && nextstate[pos] == last(ns)
             np[end] += probability[pos]
@@ -294,7 +296,7 @@ function compress(a::IntAction)
             append!(ns, nextstate[pos])
             append!(np, probability[pos])
             append!(nr, probability[pos] * reward[pos]) # normalized below
-        end 
+        end
     end
     # need to normalize by the probabilities
     for i ∈ eachindex(nr, np)
@@ -302,7 +304,7 @@ function compress(a::IntAction)
             @inbounds nr[i] /= np[i]
         end
     end
-    IntAction(ns, np, nr):: IntAction
+    IntAction(ns, np, nr)::IntAction
 end
 
 
