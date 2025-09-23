@@ -77,3 +77,34 @@ function policy_iteration_sparse(model::TabMDP, γ::Real; iterations::Int = 1000
             value = v_π,
             iterations = iterations)
 end
+
+function modified_policy_iteration(model::TabMDP, γ::Real; iterations::Int = 1000, inner_iterations = state_count(model))
+    S = state_count(model)
+    # preallocate
+    v_π = fill(0., S)
+    IP_π = zeros(S, S)
+    r_π = zeros(S)
+    
+    policy = fill(-1,S)  # 2 policies to check for change
+    policyold = fill(-1,S)
+    
+    itercount = iterations
+    for it ∈ 1:iterations
+        policyold .= policy
+        greedy!(policy, model, InfiniteH(γ), v_π)
+        mrp!(IP_π, r_π, model, policy)
+        # Solve: v_π .= (I - γ * P_π) \ r_π
+        lmul!(-γ, IP_π)
+        _add_identity!(IP_π)
+        for it2 ∈ 1:inner_iterations
+            v_π .= IP_π * v_π .+ r_π
+        end
+        # check if there was a change
+        if all(i->policy[i] == policyold[i], 1:S)
+            itercount = it
+            break
+        end
+        
+    end
+    (policy = policy, value = v_π, iterations = itercount)
+end
