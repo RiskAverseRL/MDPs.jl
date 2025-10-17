@@ -135,7 +135,7 @@ end
 
 Simulate a policy `π` in a `model` and generate states and actions for
 the `horizon` decisions and `episodes` episodes. The initial
-state is `initial`.
+state is `initial`. 
 
 The policy `π` can be a function, or a array, or an array of arrays depending on
 whether the policy is stationary, Markovian, deterministic, or randomized. When the policy
@@ -143,6 +143,8 @@ is provided as a function, then the parameter `stationary` is used.
 
 There are horizon+1 states generated in every episode including the terminal
 state at T+1.
+
+The time in the simulation is 1-based. 
 
 The initial state `initial` should either be of a type `S` or can also be a vector
 that represents the distribution over the states

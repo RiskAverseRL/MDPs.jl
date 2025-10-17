@@ -49,6 +49,9 @@ export FPolicyS, FPolicyM, TabPolicySD, TabPolicyMD
 export cumulative
 export Transition
 
+include("algorithms/qlearning.jl")
+export qlearning
+
 # ----- Domains -------
 module Domains
 include("domains/simple.jl")
