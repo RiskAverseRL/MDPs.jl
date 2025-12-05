@@ -77,3 +77,30 @@ function policy_iteration_sparse(model::TabMDP, γ::Real; iterations::Int = 1000
             value = v_π,
             iterations = iterations)
 end
+
+function modified_policy_iteration(model::TabMDP, γ::Real; iterations::Int = 1000, inner_iterations = state_count(model), ϵ::Number = 1e-3)
+    S = state_count(model)
+    # preallocate
+    vold = fill(0., S)
+    v_π = fill(0., S)
+    IP_π = zeros(S, S)
+    r_π = zeros(S)
+    
+    policy = fill(-1,S)  # 2 policies to check for change
+    
+    itercount = iterations
+    residual = 0.
+    for it ∈ 1:iterations
+        greedy!(policy, model, InfiniteH(γ), v_π)
+        mrp!(IP_π, r_π, model, policy)
+        lmul!(γ, IP_π)
+        vold .= v_π 
+        v_π .= r_π .+ IP_π*v_π
+        residual = maximum(abs.(extrema(v_π .- vold)))
+        residual ≤ ϵ && (itercount = it; break)
+        for it2 ∈ 2:inner_iterations
+            v_π .= IP_π * v_π .+ r_π
+        end    
+    end
+    (policy = policy, value = v_π, iterations = itercount, residual = residual)
+end

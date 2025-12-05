@@ -33,7 +33,7 @@ include("algorithms/mrp.jl")
 export mrp!, mrp, mrp_sparse
 
 include("algorithms/policyiteration.jl")
-export policy_iteration, policy_iteration_sparse
+export policy_iteration, policy_iteration_sparse, modified_policy_iteration
 
 include("algorithms/linprogsolve.jl")
 export lp_solve
