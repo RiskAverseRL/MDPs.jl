@@ -62,6 +62,8 @@ end
 
 
 function occupancy(model::TabMDP, π::AbstractVector{Int}, μ::AbstractVector{Float64})
+    sum(μ) ≈ 1 && μ .≥ 0 || error("Initial distribution must be non-negative and sum to one.")
+
     S = state_count(model)
     r_π = zeros(S)
     P_π = spzeros(S, S)
@@ -71,7 +73,6 @@ function occupancy(model::TabMDP, π::AbstractVector{Int}, μ::AbstractVector{Fl
     for s ∈ 1:S
         for (sn, p, r) ∈ transition(model, s, π[s])
             P_π[s, sn] += p
-            r_π[s] += p * r
             add_edge!(g, s, sn)
         end
     end
