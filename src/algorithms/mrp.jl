@@ -2,6 +2,7 @@
 # ----------------------------------------------------------------
 # Markov reward process and Markov chain
 # ----------------------------------------------------------------
+using Graphs
 
 """
     mrp!(P_π, r_π, model, π)
@@ -57,4 +58,38 @@ function mrp_sparse(model::TabMDP, π::AbstractVector{Int})
         end
     end
     (P_π, r_π)
+end
+
+
+function occupancy(model::TabMDP, π::AbstractVector{Int}, μ::AbstractVector{Float64})
+    S = state_count(model)
+    r_π = zeros(S)
+    P_π = spzeros(S, S)
+    g = SimpleDiGraph(S)
+    dist = Vector{Float64}(undef, S)
+
+    for s ∈ 1:S
+        for (sn, p, r) ∈ transition(model, s, π[s])
+            P_π[s, sn] += p
+            r_π[s] += p * r
+            add_edge!(g, s, sn)
+        end
+    end
+
+    comps = attracting_components(g)
+    nr = fill(true, S)
+    for comp ∈ comps
+        nr[comp] .= false
+    end
+    tr = findall(nr)
+    t2r = spzeros(length(tr), length(comps))
+    for (i, comp) ∈ enumerate(comps)
+        t2r[:, i] = sum(P_π[tr, comp], dims=2)
+    end
+    nav_probs = t2r' * ((I - P_π[tr, tr])' \ μ[tr])
+    for (prob, comp) ∈ zip(nav_probs, comps)
+        dist[comp] = (prob + sum(μ[comp])) * (vcat(I - P_π[comp, comp]', ones(1, length(comp))) \ vcat(zeros(length(comp)), 1))
+    end
+    dist[tr] .= 0
+    return dist
 end
