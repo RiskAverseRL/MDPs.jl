@@ -80,8 +80,7 @@ end
 function value_iteration(model::TabMDP, objective::Markov, π::Vector{Vector{Int}};
                          v_terminal = nothing)
     length(π) == horizon(objective) ||
-        
-        error("Policy π length must match the horizon $(horizon(model))")
+        error("Policy π length must match the horizon $(horizon(objective))")
     vp = make_value(model, objective)
     v = vp.value
     

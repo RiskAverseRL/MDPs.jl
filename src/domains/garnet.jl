@@ -15,7 +15,21 @@ struct GarnetMDP <: TabMDP
     S::Int
     A::Vector{Int}
 
-    # TODO: add a constructor that checks for consistency
+    function GarnetMDP(reward::Vector{Vector{Float64}}, transition::Vector{Vector{Vector{Float64}}}, S::Int, A::Vector{Int})
+        length(reward) == S || error("reward must have S=$S elements, got $(length(reward))")
+        length(transition) == S || error("transition must have S=$S elements, got $(length(transition))")
+        length(A) == S || error("A must have S=$S elements, got $(length(A))")
+
+        for s in 1:S
+            length(reward[s]) == A[s] || error("reward[$s] must have A[$s]=$(A[s]) elements, got $(length(reward[s]))")
+            length(transition[s]) == A[s] || error("transition[$s] must have A[$s]=$(A[s]) elements, got $(length(transition[s]))")
+            for a in 1:A[s]
+                length(transition[s][a]) == S || error("transition[$s][$a] must have S=$S elements, got $(length(transition[s][a]))")
+            end
+        end
+
+        new(reward, transition, S, A)
+    end
 end
 
 """

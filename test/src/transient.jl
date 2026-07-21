@@ -15,8 +15,8 @@ end
 
 @testset "Transience - some" begin
     opt = HiGHS.Optimizer
-    model = Domains.Gambler.RuinTransient(0.5, 20, true) # noop meaning you can stay still, never terminating
-
+    model = Domains.Gambler.RuinTransient(0.5, 20, true)
+    # noop meaning you can stay still, never terminating
     @test anytransient(model, opt)
     @test ~alltransient(model, opt) # should not be transient
     val = lp_solve(model, TotalReward(), opt)

@@ -128,13 +128,11 @@ function transition(model::RuinTransient, state::Int, action::Int)
         (mt(state, 1.0, 0.0),)
     else
         bet = model.noop ? action - 1 : action
-        
+
         win_state = min(model.max_capital + 1, (state - 1) + bet + 1)
         lose_state = max(1, (state - 1) - bet + 1)
 
-        zero_rew = 1e-8 * rand()
-        
-        # reward 1.0 if an donly if we achieve the target capital
+        # reward 1.0 if and only if we achieve the target capital
         win_reward = win_state == absorbing ? model.win_reward : 0.0
         lose_reward = lose_state == 1 ? model.lose_reward : 0.0
 
