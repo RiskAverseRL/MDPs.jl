@@ -23,7 +23,7 @@ using DispatchDoctor: @stable
 
     include("models/integral.jl")
     export IntMDP, IntState, IntAction
-    export load_mdp, load_int_mdp, make_int_mdp, compress
+    export load_int_mdp, make_int_mdp, compress
 
     include("valuefunction/valuefunction.jl")
     export make_value
@@ -60,6 +60,10 @@ using DispatchDoctor: @stable
     test_stability(x::Integer) = x < 0 ? float(x) : x
     
 end # @stable
+
+# methods removed type stability check (DataFramesMeta problems)
+include("models/unstable.jl")
+export load_mdp
 
 # ----- Domains -------
 module Domains
