@@ -17,7 +17,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 DataFrames = "1.8.2"
 DataFramesMeta = "0.15"
-DispatchDoctor = "0.4"
+DispatchDoctor = "0.4.28"
 Distributions = "0.25"
 Graphs = "1.14.0"
 StatsBase = "0.34"

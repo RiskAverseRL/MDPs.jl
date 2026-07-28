@@ -42,18 +42,18 @@ end
 state_count(model::Ruin) = model.max_capital + 1
 action_count(model::Ruin, state::Int) = state < model.max_capital + 1 ? state : 1 # only one action in the terminal state
 
-function transition(model::Ruin, state::Int, action::Int)
+function transition(model::Ruin, state::Int, action::Int) :: AbstractVector{Tuple{Int64, Float64, Float64}}
     1 ≤ state ≤ model.max_capital + 1 || error("invalid state")
     1 ≤ action ≤ action_count(model, state) || error("invalid action")
 
     if state == 1  # overall loss state
-        (mt(1, 1.0, 0.0),)
+        [ mt(1, 1.0, 0.0), ]
     elseif state == model.max_capital + 1 # overall win state
-        (mt(state, 1.0, 1.0),)
+        [ mt(state, 1.0, 1.0), ]
     else
         win_state = min(model.max_capital + 1, (state - 1) + (action - 1) + 1)
         lose_state = max(1, (state - 1) - (action - 1) + 1)
-        (mt(win_state, model.win, 0.), mt(lose_state, 1.0 - model.win, 0.))
+        [ mt(win_state, model.win, 0.), mt(lose_state, 1.0 - model.win, 0.) ]
     end
 end
 
@@ -116,16 +116,16 @@ function action_count(model::RuinTransient, state::Int)
     end
 end
 
-function transition(model::RuinTransient, state::Int, action::Int)
+function transition(model::RuinTransient, state::Int, action::Int) :: AbstractVector{Tuple{Int64, Float64, Float64}}
     absorbing = state_count(model)  # the "last" state
     
     1 ≤ state ≤ absorbing || error("invalid state: $state")
     1 ≤ action ≤ action_count(model, state) || error("invalid action $action in state $state")
 
     if state == 1  # broke
-        (mt(absorbing, 1.0, model.lose_reward),)
+        [ mt(absorbing, 1.0, model.lose_reward), ]
     elseif state == model.max_capital+1   # absorbing terminal state; no reward
-        (mt(state, 1.0, 0.0),)
+        [ mt(state, 1.0, 0.0), ]
     else
         bet = model.noop ? action - 1 : action
 
@@ -142,7 +142,7 @@ function transition(model::RuinTransient, state::Int, action::Int)
         end
 
         # the reward is 0 when we lose
-        (mt(win_state, model.win, win_reward), mt(lose_state, 1.0 - model.win, lose_reward))
+        [ mt(win_state, model.win, win_reward), mt(lose_state, 1.0 - model.win, lose_reward) ]
     end
 end
 

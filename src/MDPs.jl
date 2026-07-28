@@ -37,7 +37,7 @@ using DispatchDoctor: @stable
     
     include("algorithms/mrp.jl")
     export mrp!, mrp, mrp_sparse
-    export stationary_matrix, stationary_dist_sparse
+    export stationary_matrix, stationary_dist_sparse, decompose_chain
     
     include("algorithms/policyiteration.jl")
     export policy_iteration, policy_iteration_sparse, modified_policy_iteration

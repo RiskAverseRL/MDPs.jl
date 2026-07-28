@@ -1,4 +1,5 @@
 using JuMP
+using DispatchDoctor
 
 # ----------------------------------------------------------------
 # Linear Program Solver
@@ -47,8 +48,9 @@ end
 # reward: a function that specifies whether the reward
 # from the MDP is used or a custom reward
 # the function treats terminal states as having value 0
+@unstable begin
 function _transient_lp(model::TabMDP, reward::Union{Float64, Nothing},
-                       lpmf; silent) :: Union{Nothing,NamedTuple}
+                       lpmf; silent) 
 
     @assert minimum(states(model)) == 1 # make sure that the index is 1-based
 
@@ -82,6 +84,7 @@ function _transient_lp(model::TabMDP, reward::Union{Float64, Nothing},
         nothing
     end
 end
+end
 
 
 """
@@ -111,7 +114,7 @@ found found using the solver constructed by `JuMP.Model(lpmf)`.
  1
 ```
 """
-function lp_solve(model::TabMDP, obj::TotalReward, lpmf; silent = true)
+function lp_solve(model::TabMDP, obj::TotalReward, lpmf; silent = true) :: NamedTuple{(:value, :policy), Tuple{Vector{Float64}, Vector}}
     # nothing => run with the true rewards
     solution = _transient_lp(model, nothing, lpmf; silent = silent)
     if isnothing(solution)

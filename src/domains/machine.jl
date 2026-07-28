@@ -22,33 +22,34 @@ struct Replacement <: TabMDP
 # This in intentionally left empty
 end
 
-function transition(model::Replacement, state::Int, action::Int)
+function transition(model::Replacement, state::Int, action::Int) ::
+          AbstractVector{Tuple{Int64, Float64, Float64}}
     # returns: state, probability, reward
     if action == 1 # do nothing
         if state == 1
-            (mt(1,0.2,-2.), mt(3,0.8,0.))
+            [ mt(1,0.2,-2.), mt(3,0.8,0.) ]
         elseif state == 2
-            (mt(2, 1.0,-10.),)
+            [ mt(2, 1.0,-10.), ]
         elseif state ≤ 8
-            (mt(state, 0.2, 0.), mt(state+1, 0.8, 0.))
+            [ mt(state, 0.2, 0.), mt(state+1, 0.8, 0.) ]
         elseif state == 9
-            (mt(state, 0.2, 0.), mt(state+1, 0.8, -20.))
+            [ mt(state, 0.2, 0.), mt(state+1, 0.8, -20.) ]
         elseif state == 10
-            (mt(state, 1, -20.),)
+            [ mt(state, 1, -20.), ]
         else
             error("invalid state index")
         end
     elseif action == 2 # repair
         if state == 1
-            (mt(1,1.0,-2.), ) 
+            [ mt(1,1.0,-2.), ] 
         elseif state == 2
-            (mt(1, 0.6, -2.), mt(2,0.4,-10.))
+            [ mt(1, 0.6, -2.), mt(2,0.4,-10.) ]
         elseif state ≤ 8
-            (mt(state+1,0.3,0.), mt(1,0.6,0.), mt(2,0.1,0.))
+            [ mt(state+1,0.3,0.), mt(1,0.6,0.), mt(2,0.1,0.) ]
         elseif state == 9
-            (mt(state+1,0.3,-20.), mt(1,0.6,0.), mt(2,0.1,0.))
+            [ mt(state+1,0.3,-20.), mt(1,0.6,0.), mt(2,0.1,0.) ]
         elseif state == 10
-            (mt(state,0.3,-20.), mt(1,0.6,-2.), mt(2,0.1,-10.))
+            [ mt(state,0.3,-20.), mt(1,0.6,-2.), mt(2,0.1,-10.) ]
         else
             error("invalid state index")
         end

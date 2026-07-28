@@ -3,39 +3,21 @@ module Garnet
 import ...TabMDP, ...transition, ...state_count, ...action_count
 import ...actions, ...states
 
-# TODO: are these reasonable or can we replace them?
 import StatsBase, Distributions
 # ----------------------------------------------------------------
 # A Garnet MDP
 # ----------------------------------------------------------------
 
+"""
+A Garnet MDP is a tabular MDP where the number of next states available from any current state is a fixed proportion of the total number of states in the model.
+This proportion is called "nbranch" and it must between 0 and 1.
+"""
 struct GarnetMDP <: TabMDP
     reward::Vector{Vector{Float64}}
     transition::Vector{Vector{Vector{Float64}}}
     S::Int
     A::Vector{Int}
-
-    function GarnetMDP(reward::Vector{Vector{Float64}}, transition::Vector{Vector{Vector{Float64}}}, S::Int, A::Vector{Int})
-        length(reward) == S || error("reward must have S=$S elements, got $(length(reward))")
-        length(transition) == S || error("transition must have S=$S elements, got $(length(transition))")
-        length(A) == S || error("A must have S=$S elements, got $(length(A))")
-
-        for s in 1:S
-            length(reward[s]) == A[s] || error("reward[$s] must have A[$s]=$(A[s]) elements, got $(length(reward[s]))")
-            length(transition[s]) == A[s] || error("transition[$s] must have A[$s]=$(A[s]) elements, got $(length(transition[s]))")
-            for a in 1:A[s]
-                length(transition[s][a]) == S || error("transition[$s][$a] must have S=$S elements, got $(length(transition[s][a]))")
-            end
-        end
-
-        new(reward, transition, S, A)
-    end
 end
-
-"""
-A Garnet MDP is a tabular MDP where the number of next states available from any current state is a fixed proportion of the total number of states in the model.
-This proportion is called "nbranch" and it must between 0 and 1.
-"""
 
 function make_garnet(S::Integer, A::AbstractVector{Int}, nbranch::Number, min_reward::Integer, max_reward::Integer)
 

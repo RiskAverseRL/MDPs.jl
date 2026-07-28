@@ -33,7 +33,6 @@ function lp_solve(model::TabMDP, obj::InfiniteH, lpmf; silent = true)
     γ = discount(obj)
     0 ≤ γ < 1 || error("γ must be between 0 and 1.")
 
-    
     lpm = Model(lpmf)
     silent && set_silent(lpm)
     n = state_count(model)
@@ -53,8 +52,8 @@ function lp_solve(model::TabMDP, obj::InfiniteH, lpmf; silent = true)
     is_solved_and_feasible(lpm; dual = true) ||
         error("Failed to solve the MDP linear program")
     
-    (value = value.(v),
-     policy = map(x->argmax(dual.(x)), u))
+    (value = value.(v) :: Vector{Float64},
+     policy = map(x->argmax(dual.(x)) :: Int, u))
 end
 
 lp_solve(model::TabMDP, γ::Number, lpm; args...) =
