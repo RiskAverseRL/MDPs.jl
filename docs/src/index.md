@@ -32,6 +32,11 @@ Modules = [MDPs]
 Pages = ["integral.jl"]
 ```
 
+```@autodocs
+Modules = [MDPs]
+Pages = ["unstable.jl"]
+```
+
 ## Objectives
 
 
@@ -104,4 +109,8 @@ Modules = [MDPs.Domains.Machine]
 
 ```@autodocs
 Modules = [MDPs.Domains.GridWorld]
+```
+
+```@autodocs
+Modules = [MDPs.Domains.Garnet]
 ```
