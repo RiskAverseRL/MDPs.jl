@@ -59,7 +59,8 @@ struct Model <: TabMDP
     params::Parameters
 end
 
-function transition(model::Model, state::Int, action::Int)
+function transition(model::Model, state::Int, action::Int) ::
+                    AbstractVector{Tuple{Int64, Float64, Float64}}
     n = model.params.max_side_length
     n_states = n * n
     if state == (n_states + 1) # Absorbing state
@@ -86,7 +87,7 @@ function transition(model::Model, state::Int, action::Int)
         leftstate = state % n == 1 ? n_states + 1 : state - 1
         rightstate = state % n == 0 ? n_states + 1 : state + 1
     end
-    ret = []
+    ret :: AbstractVector{Tuple{Int64, Float64, Float64}} = []
     if action == Int(UP)
         push!(ret, (upstate, compl_wind, model.params.rewards_s[upstate]))
         push!(ret, (downstate, remaining_wind, model.params.rewards_s[downstate]))

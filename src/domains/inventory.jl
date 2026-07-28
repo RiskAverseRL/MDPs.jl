@@ -57,7 +57,7 @@ Stocking costs are asessed after all the orders are fulfilled.
 Causes an error when the `order` is too large, but no error when the demand cannot be
 satisfied or backlogged.
 """
-function transition(params::Parameters, stock::Int, order::Int, demand::Int)
+function transition(params::Parameters, stock::Int, order::Int, demand::Int) 
     stock ≥ -params.limits.max_backlog || error("Stock below max backlog.")
     stock ≤ params.limits.max_inventory || error("Stock over limit.")
     order ≥ 0 || error("Negative order.")

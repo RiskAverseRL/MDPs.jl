@@ -53,8 +53,8 @@ make_internal(model::MDP{S,A}, π::PolicyStationary{S,A}, state::S) where {S,A} 
 append_history(π::PolicyStationary{S,A}, _::Nothing, tr::Transition) where {S,A} =
     nothing
 
-take_action(π::PolicyStationary{S,A}, ::Nothing, s::S) where {S,A} =
-    take_action(π, s)
+take_action(π::PolicyStationary{S,A}, ::Nothing, s::S)  where {S,A}  =
+    take_action(π, s) :: A
 
 # ------------------------------------------------
 # General Markov
@@ -80,14 +80,14 @@ struct FPolicyS{S,A} <: PolicyStationary{S,A}
     π :: Function
 end
 
-take_action(π::FPolicyS{S,A}, s::S) where {S,A} = π.π(s)
+take_action(π::FPolicyS{S,A}, s::S)  where {S,A} = π.π(s) :: A
 
 """ General stationary policy specified by a function s,t → a """
 struct FPolicyM{S,A} <: PolicyMarkov{S,A}
     π :: Function
 end
 
-take_action(π::FPolicyM{S,A}, t::Int, s::S) where {S,A} = π.π(s,t)
+take_action(π::FPolicyM{S,A}, t::Int, s::S) where {S,A} = π.π(s,t) :: A
 
 # ------------------------------------------------
 # Tabular
@@ -102,7 +102,7 @@ struct TabPolicySD <: TabPolicyStationary
     π :: Vector{Int}
 end
 
-take_action(π::TabPolicySD, s::Int) = π.π[s]
+take_action(π::TabPolicySD, s::Int)  = π.π[s] :: Int
 
 """
 Markov deterministic policy for tabular MDPs. The policy `π` has an outer array over time
@@ -112,7 +112,7 @@ struct TabPolicyMD <: TabPolicyMarkov
     π :: Vector{Vector{Int}}
 end
 
-take_action(π::TabPolicyMD, t::Int, s::Int) = π.π[t][s]
+take_action(π::TabPolicyMD, t::Int, s::Int)  = π.π[t][s] :: Int
 
 make_initial_sampler(model::MDP{S,A}, initial::S) where {S,A} =
     () -> initial

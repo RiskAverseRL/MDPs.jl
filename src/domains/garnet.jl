@@ -3,25 +3,21 @@ module Garnet
 import ...TabMDP, ...transition, ...state_count, ...action_count
 import ...actions, ...states
 
-# TODO: are these reasonable or can we replace them?
 import StatsBase, Distributions
 # ----------------------------------------------------------------
 # A Garnet MDP
 # ----------------------------------------------------------------
 
+"""
+A Garnet MDP is a tabular MDP where the number of next states available from any current state is a fixed proportion of the total number of states in the model.
+This proportion is called "nbranch" and it must between 0 and 1.
+"""
 struct GarnetMDP <: TabMDP
     reward::Vector{Vector{Float64}}
     transition::Vector{Vector{Vector{Float64}}}
     S::Int
     A::Vector{Int}
-
-    # TODO: add a constructor that checks for consistency
 end
-
-"""
-A Garnet MDP is a tabular MDP where the number of next states available from any current state is a fixed proportion of the total number of states in the model.
-This proportion is called "nbranch" and it must between 0 and 1.
-"""
 
 function make_garnet(S::Integer, A::AbstractVector{Int}, nbranch::Number, min_reward::Integer, max_reward::Integer)
 

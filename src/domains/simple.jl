@@ -13,7 +13,7 @@ function transition(model::OneState, state::Int, action::Int)
     @assert action == 1
     @assert state == 1
     # returns: state, probability, reward
-    ((1::Int, 1.0::Float64, model.reward::Float64),)
+    [(1::Int, 1.0::Float64, model.reward::Float64),]
 end
 
 state_count(model::OneState) = 1
@@ -24,11 +24,12 @@ struct OneStatePlusMinus <: TabMDP
     reward::Float64
 end
 
-function transition(model::OneStatePlusMinus, state::Int, action::Int)
+function transition(model::OneStatePlusMinus, state::Int, action::Int) 
     @assert action == 1
     @assert state == 1
     # returns: state, probability, reward
-    ((1::Int, 0.8::Float64, model.reward::Float64), (1::Int, 0.2::Float64, -model.reward::Float64))
+    [(1::Int, 0.8::Float64, model.reward::Float64),
+     (1::Int, 0.2::Float64, -model.reward::Float64) ]
 end
 
 state_count(model::OneStatePlusMinus) = 1
@@ -52,17 +53,19 @@ struct TwoStates <: TabMDP
     end
 end
 
-function transition(model::TwoStates, state::Int, action::Int)
+function transition(model::TwoStates, state::Int, action::Int) :: AbstractVector{Tuple{Int64, Float64, Float64}}
     @assert state ∈ (1, 2)
     @assert action == 1
     # returns: state, probability, reward
     if state == 1
-        ((1::Int, 1.0 - model.epsilon::Float64, model.rewards[1]::Float64), (2::Int, model.epsilon::Float64, model.rewards[1]::Float64))
+        [(1::Int, 1.0 - model.epsilon::Float64, model.rewards[1]::Float64),
+         (2::Int, model.epsilon::Float64, model.rewards[1]::Float64)]
     else
         if model.transient
-            ((2::Int, 1.0::Float64, 0.0::Float64),)
+            [(2::Int, 1.0::Float64, 0.0::Float64),]
         else
-            ((1::Int, model.epsilon::Float64, model.rewards[2]::Float64), (2::Int, 1.0 - model.epsilon::Float64, model.rewards[2]::Float64))
+            [(1::Int, model.epsilon::Float64, model.rewards[2]::Float64),
+             (2::Int, 1.0 - model.epsilon::Float64, model.rewards[2]::Float64)]
         end
     end
 end
